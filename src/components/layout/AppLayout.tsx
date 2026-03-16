@@ -8,7 +8,7 @@ export const AppLayout = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto relative">
-      <main className="pb-16">
+      <main className="pb-24">
         <Outlet />
       </main>
       <CreateMenu open={createOpen} onClose={() => setCreateOpen(false)} />
