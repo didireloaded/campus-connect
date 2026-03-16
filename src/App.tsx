@@ -25,6 +25,7 @@ import Clubs from "./pages/Clubs";
 import Explore from "./pages/Explore";
 import StoryViewer from "./pages/StoryViewer";
 import EventDetail from "./pages/EventDetail";
+import UserProfilePage from "./pages/UserProfilePage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -59,6 +60,7 @@ const AppRoutes = () => {
       <Route path="/clubs" element={<ProtectedRoute><Clubs /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
       <Route path="/event-detail" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+      <Route path="/profile/:username" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
       <Route
         element={
           <ProtectedRoute>
