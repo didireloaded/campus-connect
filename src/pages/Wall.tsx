@@ -133,6 +133,9 @@ export default function Wall() {
               transition={{ delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
               className="bg-muted/10 rounded-xl p-4 border border-muted/10"
             >
+              {post.alias && (
+                <p className="text-xs font-semibold text-campus-orange/80 mb-1.5">🎭 {post.alias}</p>
+              )}
               <p className="text-sm text-primary-foreground/90 leading-relaxed">{post.content}</p>
               <div className="flex items-center justify-between mt-3">
                 <span className="text-xs text-muted-foreground">
