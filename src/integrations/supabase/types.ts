@@ -858,6 +858,7 @@ export type Database = {
           story_type: string | null
           university_id: string
           user_id: string
+          view_count: number | null
         }
         Insert: {
           created_at?: string | null
@@ -867,6 +868,7 @@ export type Database = {
           story_type?: string | null
           university_id: string
           user_id: string
+          view_count?: number | null
         }
         Update: {
           created_at?: string | null
@@ -876,6 +878,7 @@ export type Database = {
           story_type?: string | null
           university_id?: string
           user_id?: string
+          view_count?: number | null
         }
         Relationships: [
           {
@@ -1053,11 +1056,84 @@ export type Database = {
         }
         Relationships: []
       }
+      wall_comments: {
+        Row: {
+          alias: string
+          content: string
+          created_at: string | null
+          id: string
+          parent_id: string | null
+          wall_post_id: string
+        }
+        Insert: {
+          alias: string
+          content: string
+          created_at?: string | null
+          id?: string
+          parent_id?: string | null
+          wall_post_id: string
+        }
+        Update: {
+          alias?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          parent_id?: string | null
+          wall_post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wall_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "wall_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wall_comments_wall_post_id_fkey"
+            columns: ["wall_post_id"]
+            isOneToOne: false
+            referencedRelation: "wall_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wall_downvotes: {
+        Row: {
+          created_at: string | null
+          id: string
+          user_id: string
+          wall_post_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          user_id: string
+          wall_post_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          wall_post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wall_downvotes_wall_post_id_fkey"
+            columns: ["wall_post_id"]
+            isOneToOne: false
+            referencedRelation: "wall_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wall_posts: {
         Row: {
           alias: string | null
+          comments_count: number | null
           content: string
           created_at: string | null
+          downvotes: number | null
           id: string
           moderation_reason: string | null
           moderation_status: string | null
@@ -1066,8 +1142,10 @@ export type Database = {
         }
         Insert: {
           alias?: string | null
+          comments_count?: number | null
           content: string
           created_at?: string | null
+          downvotes?: number | null
           id?: string
           moderation_reason?: string | null
           moderation_status?: string | null
@@ -1076,8 +1154,10 @@ export type Database = {
         }
         Update: {
           alias?: string | null
+          comments_count?: number | null
           content?: string
           created_at?: string | null
+          downvotes?: number | null
           id?: string
           moderation_reason?: string | null
           moderation_status?: string | null
