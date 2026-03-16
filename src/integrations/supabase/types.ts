@@ -14,6 +14,82 @@ export type Database = {
   }
   public: {
     Tables: {
+      club_members: {
+        Row: {
+          club_id: string
+          id: string
+          joined_at: string | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clubs: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          members_count: number | null
+          name: string
+          university_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          members_count?: number | null
+          name: string
+          university_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          members_count?: number | null
+          name?: string
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clubs_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           content: string
@@ -49,6 +125,47 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      confessions: {
+        Row: {
+          alias: string | null
+          content: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          moderation_status: string | null
+          reactions_count: number | null
+          university_id: string
+        }
+        Insert: {
+          alias?: string | null
+          content: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          moderation_status?: string | null
+          reactions_count?: number | null
+          university_id: string
+        }
+        Update: {
+          alias?: string | null
+          content?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          moderation_status?: string | null
+          reactions_count?: number | null
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "confessions_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
             referencedColumns: ["id"]
           },
         ]
@@ -185,6 +302,106 @@ export type Database = {
           },
         ]
       }
+      jobs: {
+        Row: {
+          company: string | null
+          contact_info: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          job_type: string
+          location: string | null
+          pay: string | null
+          poster_id: string
+          status: string
+          title: string
+          university_id: string
+        }
+        Insert: {
+          company?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          job_type?: string
+          location?: string | null
+          pay?: string | null
+          poster_id: string
+          status?: string
+          title: string
+          university_id: string
+        }
+        Update: {
+          company?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          job_type?: string
+          location?: string | null
+          pay?: string | null
+          poster_id?: string
+          status?: string
+          title?: string
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lecture_notes: {
+        Row: {
+          course: string | null
+          created_at: string | null
+          description: string | null
+          downloads_count: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          title: string
+          university_id: string
+          user_id: string
+        }
+        Insert: {
+          course?: string | null
+          created_at?: string | null
+          description?: string | null
+          downloads_count?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          title: string
+          university_id: string
+          user_id: string
+        }
+        Update: {
+          course?: string | null
+          created_at?: string | null
+          description?: string | null
+          downloads_count?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          title?: string
+          university_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lecture_notes_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string | null
@@ -217,6 +434,53 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lost_found: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          item_type: string
+          location: string | null
+          status: string
+          title: string
+          university_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          item_type?: string
+          location?: string | null
+          status?: string
+          title: string
+          university_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          item_type?: string
+          location?: string | null
+          status?: string
+          title?: string
+          university_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lost_found_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
             referencedColumns: ["id"]
           },
         ]
@@ -316,6 +580,79 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          options: Json
+          question: string
+          university_id: string
+          user_id: string
+          votes_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          options?: Json
+          question: string
+          university_id: string
+          user_id: string
+          votes_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          options?: Json
+          question?: string
+          university_id?: string
+          user_id?: string
+          votes_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
             referencedColumns: ["id"]
           },
         ]
@@ -462,6 +799,56 @@ export type Database = {
           },
         ]
       }
+      rides: {
+        Row: {
+          created_at: string | null
+          departure_time: string
+          description: string | null
+          from_location: string
+          id: string
+          price: number | null
+          seats_available: number
+          status: string
+          to_location: string
+          university_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          departure_time: string
+          description?: string | null
+          from_location: string
+          id?: string
+          price?: number | null
+          seats_available?: number
+          status?: string
+          to_location: string
+          university_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          departure_time?: string
+          description?: string | null
+          from_location?: string
+          id?: string
+          price?: number | null
+          seats_available?: number
+          status?: string
+          to_location?: string
+          university_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rides_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stories: {
         Row: {
           created_at: string | null
@@ -503,6 +890,79 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_groups: {
+        Row: {
+          course: string | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          max_members: number | null
+          members_count: number | null
+          name: string
+          university_id: string
+        }
+        Insert: {
+          course?: string | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          max_members?: number | null
+          members_count?: number | null
+          name: string
+          university_id: string
+        }
+        Update: {
+          course?: string | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          max_members?: number | null
+          members_count?: number | null
+          name?: string
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_groups_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
             referencedColumns: ["id"]
           },
         ]
