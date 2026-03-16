@@ -23,6 +23,8 @@ import Confessions from "./pages/Confessions";
 import Jobs from "./pages/Jobs";
 import Clubs from "./pages/Clubs";
 import Explore from "./pages/Explore";
+import StoryViewer from "./pages/StoryViewer";
+import EventDetail from "./pages/EventDetail";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -55,6 +57,8 @@ const AppRoutes = () => {
       <Route path="/confessions" element={<ProtectedRoute><Confessions /></ProtectedRoute>} />
       <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
       <Route path="/clubs" element={<ProtectedRoute><Clubs /></ProtectedRoute>} />
+      <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
+      <Route path="/event-detail" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
       <Route
         element={
           <ProtectedRoute>
