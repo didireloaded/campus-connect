@@ -1,24 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowBigUp, Flag, Send, Loader2, Ghost } from "lucide-react";
+import { ArrowBigUp, Flag, MessageCircle, Loader2, Ghost, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
-
-const GHOST_NAMES = [
-  "GhostFox", "MidnightLion", "CampusGhost", "ShadowOwl", "NightWolf",
-  "PhantomEagle", "SilentViper", "MysticRaven", "HiddenPanther", "StealthHawk",
-  "DarkFalcon", "GhostPanda", "NeonTiger", "CryptoLynx", "SilverFox",
-];
-
-const generateAlias = () => {
-  const name = GHOST_NAMES[Math.floor(Math.random() * GHOST_NAMES.length)];
-  const num = Math.floor(Math.random() * 99) + 1;
-  return `${name}${num}`;
-};
 
 interface WallPost {
   id: string;
@@ -31,9 +17,7 @@ interface WallPost {
 export default function Wall() {
   const { user, profile } = useAuth();
   const [posts, setPosts] = useState<WallPost[]>([]);
-  const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
-  const [posting, setPosting] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     const { data } = await supabase
@@ -54,19 +38,6 @@ export default function Wall() {
     return () => { supabase.removeChannel(channel); };
   }, [fetchPosts]);
 
-  const handlePost = async () => {
-    if (!content.trim() || !profile?.university_id) return;
-    setPosting(true);
-    const { error } = await supabase.from("wall_posts").insert({
-      university_id: profile.university_id,
-      content: content.trim(),
-      alias: generateAlias(),
-    } as any);
-    if (error) toast.error("Failed to post");
-    else { setContent(""); fetchPosts(); }
-    setPosting(false);
-  };
-
   const handleUpvote = async (postId: string) => {
     if (!user) return;
     const { error } = await supabase.from("wall_upvotes").insert({
@@ -74,7 +45,6 @@ export default function Wall() {
       user_id: user.id,
     });
     if (error && error.code === "23505") {
-      // Already upvoted, remove
       await supabase.from("wall_upvotes").delete().eq("wall_post_id", postId).eq("user_id", user.id);
     }
     fetchPosts();
@@ -83,76 +53,75 @@ export default function Wall() {
   return (
     <div className="min-h-screen bg-campus-ghost">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-campus-ghost/90 backdrop-blur-xl px-4 py-3 border-b border-muted/20">
+      <header className="sticky top-0 z-40 bg-campus-ghost/90 backdrop-blur-xl px-4 pt-3 pb-2">
         <div className="flex items-center gap-2">
-          <Ghost size={20} className="text-campus-orange" />
+          <Ghost size={22} className="text-campus-orange" />
           <h1 className="text-xl font-extrabold tracking-tight text-primary-foreground">
             The Wall
           </h1>
         </div>
-        <p className="text-xs text-muted-foreground mt-0.5">Anonymous • Posts disappear in 24h</p>
+        <div className="flex items-center gap-1.5 mt-1">
+          <Clock size={12} className="text-muted-foreground" />
+          <p className="text-[11px] text-muted-foreground">Anonymous · Posts vanish in 24 hours</p>
+        </div>
       </header>
 
-      {/* Compose */}
-      <div className="px-4 py-3">
-        <Textarea
-          placeholder="Speak your mind anonymously..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="bg-muted/20 border-muted/20 text-primary-foreground placeholder:text-muted-foreground min-h-[60px] resize-none focus-visible:ring-campus-orange/30"
-        />
-        <div className="flex justify-end mt-2">
-          <Button
-            size="sm"
-            onClick={handlePost}
-            disabled={!content.trim() || posting}
-            className="bg-campus-orange hover:bg-campus-orange/90 text-primary-foreground"
-          >
-            <Send size={14} className="mr-1" />
-            {posting ? "Posting..." : "Post Anonymously"}
-          </Button>
-        </div>
-      </div>
-
       {/* Feed */}
-      <div className="space-y-2 px-4 pb-20">
+      <div className="px-4 pt-2 pb-20 space-y-3">
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-campus-orange" size={28} />
           </div>
         ) : posts.length === 0 ? (
-          <p className="text-center text-muted-foreground text-sm py-20">
-            The wall is empty. Be the first ghost.
-          </p>
+          <div className="text-center py-20">
+            <p className="text-4xl mb-3">👻</p>
+            <p className="font-semibold text-primary-foreground">The wall is empty</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Be the first ghost. Tap + to post anonymously.
+            </p>
+          </div>
         ) : (
           posts.map((post, i) => (
             <motion.div
               key={post.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
-              className="bg-muted/10 rounded-xl p-4 border border-muted/10"
+              transition={{ delay: i * 0.04, ease: [0.4, 0, 0.2, 1] }}
+              className="bg-muted/8 rounded-2xl p-4 border border-muted/10 backdrop-blur-sm"
             >
-              {post.alias && (
-                <p className="text-xs font-semibold text-campus-orange/80 mb-1.5">🎭 {post.alias}</p>
-              )}
-              <p className="text-sm text-primary-foreground/90 leading-relaxed">{post.content}</p>
-              <div className="flex items-center justify-between mt-3">
-                <span className="text-xs text-muted-foreground">
+              {/* Alias */}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-7 h-7 rounded-full bg-campus-orange/20 flex items-center justify-center">
+                  <Ghost size={14} className="text-campus-orange" />
+                </div>
+                <span className="text-xs font-bold text-campus-orange">
+                  {post.alias || "Anonymous"}
+                </span>
+                <span className="text-[10px] text-muted-foreground ml-auto">
                   {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                 </span>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleUpvote(post.id)}
-                    className="flex items-center gap-1 text-muted-foreground hover:text-campus-orange transition-colors"
-                  >
-                    <ArrowBigUp size={20} />
-                    <span className="text-xs font-medium">{post.upvotes}</span>
-                  </button>
-                  <button className="text-muted-foreground hover:text-destructive transition-colors">
-                    <Flag size={16} />
-                  </button>
-                </div>
+              </div>
+
+              {/* Content */}
+              <p className="text-[15px] text-primary-foreground/90 leading-relaxed pl-9">
+                {post.content}
+              </p>
+
+              {/* Actions */}
+              <div className="flex items-center gap-4 mt-3 pl-9">
+                <button
+                  onClick={() => handleUpvote(post.id)}
+                  className="flex items-center gap-1.5 text-muted-foreground hover:text-campus-orange transition-colors group"
+                >
+                  <ArrowBigUp size={22} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-semibold">{post.upvotes}</span>
+                </button>
+                <button className="flex items-center gap-1.5 text-muted-foreground hover:text-primary-foreground transition-colors">
+                  <MessageCircle size={18} />
+                </button>
+                <button className="text-muted-foreground hover:text-destructive transition-colors ml-auto">
+                  <Flag size={16} />
+                </button>
               </div>
             </motion.div>
           ))

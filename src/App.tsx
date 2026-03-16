@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Wall from "./pages/Wall";
 import Events from "./pages/Events";
+import MapPage from "./pages/MapPage";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
@@ -35,6 +36,9 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
+      <Route path="/notifications" element={
+        <ProtectedRoute><Notifications /></ProtectedRoute>
+      } />
       <Route
         element={
           <ProtectedRoute>
@@ -45,7 +49,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Index />} />
         <Route path="/wall" element={<Wall />} />
         <Route path="/events" element={<Events />} />
-        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/map" element={<MapPage />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<NotFound />} />

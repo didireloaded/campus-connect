@@ -1,14 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { CalendarDays, MapPin, Users, Plus, Loader2, X } from "lucide-react";
+import { CalendarDays, MapPin, Users, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+import { motion } from "framer-motion";
+import { format, isPast } from "date-fns";
 
 interface CampusEvent {
   id: string;
@@ -26,12 +22,7 @@ export default function Events() {
   const { user, profile } = useAuth();
   const [events, setEvents] = useState<CampusEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [locationName, setLocationName] = useState("");
+  const [attendedIds, setAttendedIds] = useState<Set<string>>(new Set());
 
   const fetchEvents = useCallback(async () => {
     const { data } = await supabase
@@ -43,127 +34,183 @@ export default function Events() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
-
-  const handleCreate = async () => {
-    if (!title || !eventDate || !user || !profile?.university_id) return;
-    setCreating(true);
-    const { error } = await supabase.from("events").insert({
-      creator_id: user.id,
-      university_id: profile.university_id,
-      title,
-      description: description || null,
-      event_date: eventDate,
-      location_name: locationName || null,
-    });
-    if (error) toast.error("Failed to create event");
-    else {
-      toast.success("Event created!");
-      setShowCreate(false);
-      setTitle(""); setDescription(""); setEventDate(""); setLocationName("");
-      fetchEvents();
+  useEffect(() => {
+    fetchEvents();
+    // Check which events user is attending
+    if (user) {
+      supabase
+        .from("event_attendees")
+        .select("event_id")
+        .eq("user_id", user.id)
+        .then(({ data }) => {
+          if (data) setAttendedIds(new Set(data.map((d) => d.event_id)));
+        });
     }
-    setCreating(false);
-  };
+  }, [fetchEvents, user]);
 
   const handleAttend = async (eventId: string) => {
     if (!user) return;
-    const { error } = await supabase.from("event_attendees").insert({
-      event_id: eventId,
-      user_id: user.id,
-    });
-    if (error?.code === "23505") toast.info("Already attending");
-    else if (error) toast.error("Failed to RSVP");
-    else toast.success("You're attending!");
+    const isAttending = attendedIds.has(eventId);
+
+    if (isAttending) {
+      await supabase.from("event_attendees").delete().eq("event_id", eventId).eq("user_id", user.id);
+      setAttendedIds((prev) => { const n = new Set(prev); n.delete(eventId); return n; });
+      toast.info("Removed from event");
+    } else {
+      const { error } = await supabase.from("event_attendees").insert({ event_id: eventId, user_id: user.id });
+      if (error) { toast.error("Failed to RSVP"); return; }
+      setAttendedIds((prev) => new Set(prev).add(eventId));
+      toast.success("You're attending! 🎉");
+    }
     fetchEvents();
   };
 
+  const upcomingEvents = events.filter((e) => !isPast(new Date(e.event_date)));
+  const pastEvents = events.filter((e) => isPast(new Date(e.event_date)));
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl px-4 py-3 border-b border-border flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-extrabold tracking-tight text-foreground">Events</h1>
-          <p className="text-xs text-muted-foreground">Campus happenings</p>
-        </div>
-        <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
-          {showCreate ? <X size={16} /> : <Plus size={16} />}
-          <span className="ml-1">{showCreate ? "Cancel" : "Create"}</span>
-        </Button>
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl px-4 py-3">
+        <h1 className="text-xl font-extrabold tracking-tight text-foreground">Events</h1>
+        <p className="text-[11px] text-muted-foreground mt-0.5">What's happening on campus</p>
       </header>
 
-      <AnimatePresence>
-        {showCreate && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden bg-card shadow-card"
-          >
-            <div className="p-4 space-y-3">
-              <div><Label>Title</Label><Input placeholder="Event title" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-              <div><Label>Description</Label><Textarea placeholder="What's happening?" value={description} onChange={(e) => setDescription(e.target.value)} className="resize-none" /></div>
-              <div><Label>Date & Time</Label><Input type="datetime-local" value={eventDate} onChange={(e) => setEventDate(e.target.value)} /></div>
-              <div><Label>Location</Label><Input placeholder="Where?" value={locationName} onChange={(e) => setLocationName(e.target.value)} /></div>
-              <Button onClick={handleCreate} disabled={!title || !eventDate || creating} className="w-full">
-                {creating ? "Creating..." : "Create Event"}
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="p-4 space-y-3 pb-20">
+      <div className="px-4 pb-20">
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-primary" size={28} />
           </div>
         ) : events.length === 0 ? (
-          <p className="text-center text-muted-foreground text-sm py-20">No events yet</p>
+          <div className="text-center py-20">
+            <p className="text-4xl mb-3">🗓️</p>
+            <p className="font-semibold text-foreground">No events yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Tap + to create the first campus event</p>
+          </div>
         ) : (
-          events.map((event) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-card rounded-xl shadow-elevated overflow-hidden"
-            >
-              {event.cover_image && (
-                <img src={event.cover_image} alt="" className="w-full h-36 object-cover" />
-              )}
-              <div className="p-4">
-                <h3 className="font-semibold text-foreground">{event.title}</h3>
-                {event.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{event.description}</p>
-                )}
-                <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <CalendarDays size={14} />
-                    {format(new Date(event.event_date), "MMM d, h:mm a")}
-                  </span>
-                  {event.location_name && (
-                    <span className="flex items-center gap-1">
-                      <MapPin size={14} />
-                      {event.location_name}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <Users size={14} />
-                    {event.attendees_count} attending
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-3 w-full"
-                  onClick={() => handleAttend(event.id)}
-                >
-                  Join Event
-                </Button>
+          <>
+            {upcomingEvents.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-2">Upcoming</p>
+                {upcomingEvents.map((event, i) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    index={i}
+                    isAttending={attendedIds.has(event.id)}
+                    onAttend={() => handleAttend(event.id)}
+                  />
+                ))}
               </div>
-            </motion.div>
-          ))
+            )}
+
+            {pastEvents.length > 0 && (
+              <div className="space-y-3 mt-6">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Past</p>
+                {pastEvents.map((event, i) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    index={i}
+                    isAttending={attendedIds.has(event.id)}
+                    onAttend={() => handleAttend(event.id)}
+                    isPast
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
+  );
+}
+
+function EventCard({
+  event,
+  index,
+  isAttending,
+  onAttend,
+  isPast = false,
+}: {
+  event: CampusEvent;
+  index: number;
+  isAttending: boolean;
+  onAttend: () => void;
+  isPast?: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className={`rounded-2xl shadow-elevated overflow-hidden bg-card ${isPast ? "opacity-60" : ""}`}
+    >
+      {/* Cover */}
+      <div className="h-32 bg-gradient-to-br from-primary/20 to-campus-purple/20 relative">
+        {event.cover_image ? (
+          <img src={event.cover_image} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <CalendarDays size={32} className="text-primary/30" />
+          </div>
+        )}
+        {/* Date badge */}
+        <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1.5 text-center shadow-card">
+          <p className="text-[10px] font-bold text-primary uppercase">
+            {format(new Date(event.event_date), "MMM")}
+          </p>
+          <p className="text-lg font-extrabold text-foreground leading-none">
+            {format(new Date(event.event_date), "d")}
+          </p>
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className="p-4">
+        <h3 className="font-bold text-foreground text-[15px]">{event.title}</h3>
+        {event.description && (
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{event.description}</p>
+        )}
+        <div className="flex flex-wrap items-center gap-3 mt-3">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <CalendarDays size={13} />
+            {format(new Date(event.event_date), "EEE, h:mm a")}
+          </span>
+          {event.location_name && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin size={13} />
+              {event.location_name}
+            </span>
+          )}
+        </div>
+
+        {/* Attend button */}
+        <div className="flex items-center justify-between mt-4">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Users size={13} />
+            {event.attendees_count} attending
+          </span>
+          {!isPast && (
+            <button
+              onClick={onAttend}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                isAttending
+                  ? "bg-campus-green/15 text-campus-green"
+                  : "bg-primary text-primary-foreground shadow-card hover:shadow-elevated"
+              }`}
+            >
+              {isAttending ? (
+                <>
+                  <CheckCircle2 size={14} />
+                  Attending
+                </>
+              ) : (
+                "Join Event"
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </motion.div>
   );
 }

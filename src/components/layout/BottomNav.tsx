@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Flame, CalendarDays, Bell, User } from "lucide-react";
+import { Home, Flame, CalendarDays, MapPin, User } from "lucide-react";
 import { motion } from "framer-motion";
 
 const tabs = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/wall", icon: Flame, label: "Wall" },
   { path: "/events", icon: CalendarDays, label: "Events" },
-  { path: "/notifications", icon: Bell, label: "Alerts" },
+  { path: "/map", icon: MapPin, label: "Map" },
   { path: "/profile", icon: User, label: "Profile" },
 ];
 
@@ -15,7 +15,7 @@ export const BottomNav = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl safe-bottom">
       <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
