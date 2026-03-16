@@ -39,6 +39,9 @@ export default function Index() {
           )}
         </div>
         <div className="flex items-center gap-1">
+          <button onClick={() => navigate("/explore")} className="p-2 text-foreground">
+            <Compass size={22} />
+          </button>
           <button onClick={() => navigate("/notifications")} className="relative p-2 text-foreground">
             <Bell size={22} />
             {unreadCount > 0 && (
