@@ -4,11 +4,38 @@ import { wallService } from "@/services/wallService";
 import { ArrowBigUp, Flag, MessageCircle, Loader2, Ghost, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, differenceInHours, differenceInMinutes } from "date-fns";
+import { useEffect, useState } from "react";
+import { profileService } from "@/services/profileService";
+
+function TimeLeft({ createdAt }: { createdAt: string }) {
+  const created = new Date(createdAt);
+  const expiresAt = new Date(created.getTime() + 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const hoursLeft = differenceInHours(expiresAt, now);
+  const minutesLeft = differenceInMinutes(expiresAt, now) % 60;
+
+  if (hoursLeft <= 0 && minutesLeft <= 0) return null;
+
+  return (
+    <span className="text-[9px] text-campus-orange font-semibold">
+      🔥 {hoursLeft > 0 ? `${hoursLeft}h ${minutesLeft}m` : `${minutesLeft}m`} left
+    </span>
+  );
+}
 
 export default function Wall() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { posts, loading, refresh } = useWallPosts();
+  const [uniName, setUniName] = useState("");
+
+  useEffect(() => {
+    if (profile?.university_id) {
+      profileService.getUniversity(profile.university_id).then((uni) => {
+        setUniName((uni as any).short_name || (uni as any).name || "Campus");
+      }).catch(() => {});
+    }
+  }, [profile]);
 
   const handleUpvote = async (postId: string) => {
     if (!user) return;
@@ -35,7 +62,9 @@ export default function Wall() {
       <header className="sticky top-0 z-40 bg-campus-ghost/90 backdrop-blur-xl px-4 pt-3 pb-2">
         <div className="flex items-center gap-2">
           <Ghost size={22} className="text-campus-orange" />
-          <h1 className="text-xl font-extrabold tracking-tight text-primary-foreground">The Wall</h1>
+          <h1 className="text-xl font-extrabold tracking-tight text-primary-foreground">
+            {uniName ? `${uniName} Wall` : "The Wall"}
+          </h1>
         </div>
         <div className="flex items-center gap-1.5 mt-1">
           <Clock size={12} className="text-muted-foreground" />
@@ -68,9 +97,12 @@ export default function Wall() {
                   <Ghost size={14} className="text-campus-orange" />
                 </div>
                 <span className="text-xs font-bold text-campus-orange">{post.alias || "Anonymous"}</span>
-                <span className="text-[10px] text-muted-foreground ml-auto">
-                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                </span>
+                <div className="flex items-center gap-2 ml-auto">
+                  <TimeLeft createdAt={post.created_at} />
+                  <span className="text-[10px] text-muted-foreground">
+                    {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                  </span>
+                </div>
               </div>
               <p className="text-[15px] text-primary-foreground/90 leading-relaxed pl-9">{post.content}</p>
               <div className="flex items-center gap-4 mt-3 pl-9">

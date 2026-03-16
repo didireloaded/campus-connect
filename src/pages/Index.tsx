@@ -13,29 +13,32 @@ export default function Index() {
   const navigate = useNavigate();
   const { posts, loading, refresh } = usePosts();
   const { unreadCount } = useNotifications();
+  const [uniName, setUniName] = useState("");
   const [uniShortName, setUniShortName] = useState("");
 
   useEffect(() => {
     if (profile?.university_id) {
       profileService.getUniversity(profile.university_id).then((uni) => {
-        setUniShortName((uni as any).short_name || (uni as any).name);
+        setUniShortName((uni as any).short_name || "");
+        setUniName((uni as any).short_name || (uni as any).name || "Campus");
       }).catch(() => {});
     }
   }, [profile]);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between">
-        <h1 className="text-xl font-extrabold tracking-tight text-foreground">
-          Camp<span className="text-primary">Life</span>
-        </h1>
-        <div className="flex items-center gap-1">
+        <div>
+          <h1 className="text-xl font-extrabold tracking-tight text-foreground">
+            {uniName ? `${uniName} Feed` : <>Camp<span className="text-primary">Life</span></>}
+          </h1>
           {uniShortName && (
-            <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-2">
-              {uniShortName}
-            </span>
+            <p className="text-[10px] text-muted-foreground font-medium -mt-0.5">
+              Only visible to {uniShortName} students
+            </p>
           )}
+        </div>
+        <div className="flex items-center gap-1">
           <button onClick={() => navigate("/notifications")} className="relative p-2 text-foreground">
             <Bell size={22} />
             {unreadCount > 0 && (
