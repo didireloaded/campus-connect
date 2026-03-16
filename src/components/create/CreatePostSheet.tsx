@@ -49,10 +49,10 @@ export const CreatePostSheet = ({ open, onClose }: Props) => {
         const ext = imageFile.name.split(".").pop();
         const path = `${user.id}/${Date.now()}.${ext}`;
         const { error: uploadErr } = await supabase.storage
-          .from("post-images")
+          .from("posts")
           .upload(path, imageFile, { upsert: false });
         if (uploadErr) throw uploadErr;
-        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(path);
+        const { data: urlData } = supabase.storage.from("posts").getPublicUrl(path);
         imageUrl = urlData.publicUrl;
       }
 
