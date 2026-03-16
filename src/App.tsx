@@ -60,6 +60,7 @@ const AppRoutes = () => {
       <Route path="/clubs" element={<ProtectedRoute><Clubs /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
       <Route path="/event-detail" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+      <Route path="/profile/:username" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
       <Route
         element={
           <ProtectedRoute>
