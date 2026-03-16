@@ -328,6 +328,8 @@ export type Database = {
           id: string
           image_url: string | null
           likes_count: number | null
+          moderation_reason: string | null
+          moderation_status: string | null
           university_id: string
           user_id: string
         }
@@ -338,6 +340,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           likes_count?: number | null
+          moderation_reason?: string | null
+          moderation_status?: string | null
           university_id: string
           user_id: string
         }
@@ -348,6 +352,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           likes_count?: number | null
+          moderation_reason?: string | null
+          moderation_status?: string | null
           university_id?: string
           user_id?: string
         }
@@ -501,6 +507,41 @@ export type Database = {
           },
         ]
       }
+      trending_topics: {
+        Row: {
+          detected_at: string | null
+          expires_at: string | null
+          id: string
+          post_count: number | null
+          topic: string
+          university_id: string
+        }
+        Insert: {
+          detected_at?: string | null
+          expires_at?: string | null
+          id?: string
+          post_count?: number | null
+          topic: string
+          university_id: string
+        }
+        Update: {
+          detected_at?: string | null
+          expires_at?: string | null
+          id?: string
+          post_count?: number | null
+          topic?: string
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trending_topics_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       universities: {
         Row: {
           city: string | null
@@ -534,12 +575,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       wall_posts: {
         Row: {
           alias: string | null
           content: string
           created_at: string | null
           id: string
+          moderation_reason: string | null
+          moderation_status: string | null
           university_id: string
           upvotes: number | null
         }
@@ -548,6 +609,8 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          moderation_reason?: string | null
+          moderation_status?: string | null
           university_id: string
           upvotes?: number | null
         }
@@ -556,6 +619,8 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          moderation_reason?: string | null
+          moderation_status?: string | null
           university_id?: string
           upvotes?: number | null
         }
@@ -610,10 +675,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_ranked_feed: {
+        Args: { p_limit?: number; p_offset?: number; p_university_id: string }
+        Returns: {
+          comments_count: number
+          content: string
+          created_at: string
+          id: string
+          image_url: string
+          likes_count: number
+          score: number
+          university_id: string
+          user_id: string
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -740,6 +825,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
