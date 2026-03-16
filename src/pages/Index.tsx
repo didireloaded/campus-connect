@@ -1,97 +1,55 @@
-import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { usePosts } from "@/hooks/usePosts";
+import { useNotifications } from "@/hooks/useNotifications";
 import { PostCard } from "@/components/feed/PostCard";
 import { StoriesBar } from "@/components/feed/StoriesBar";
 import { Bell, Loader2 } from "lucide-react";
-
-interface PostWithProfile {
-  id: string;
-  user_id: string;
-  content: string | null;
-  image_url: string | null;
-  likes_count: number;
-  comments_count: number;
-  created_at: string;
-  profiles: {
-    username: string;
-    avatar_url: string | null;
-    full_name: string | null;
-  };
-}
+import { useEffect, useState } from "react";
+import { profileService } from "@/services/profileService";
 
 export default function Index() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<PostWithProfile[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { posts, loading, refresh } = usePosts();
+  const { unreadCount } = useNotifications();
   const [uniShortName, setUniShortName] = useState("");
 
-  const fetchPosts = useCallback(async () => {
-    const { data } = await supabase
-      .from("posts")
-      .select("*, profiles(username, avatar_url, full_name)")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (data) setPosts(data as unknown as PostWithProfile[]);
-    setLoading(false);
-  }, []);
-
   useEffect(() => {
-    fetchPosts();
-
-    // Get university short name
     if (profile?.university_id) {
-      supabase
-        .from("universities")
-        .select("short_name, name")
-        .eq("id", profile.university_id)
-        .single()
-        .then(({ data }) => {
-          if (data) setUniShortName((data as any).short_name || (data as any).name);
-        });
+      profileService.getUniversity(profile.university_id).then((uni) => {
+        setUniShortName((uni as any).short_name || (uni as any).name);
+      }).catch(() => {});
     }
-
-    const channel = supabase
-      .channel("posts-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, () => fetchPosts())
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [fetchPosts, profile]);
+  }, [profile]);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-extrabold tracking-tight text-foreground">
-            Camp<span className="text-primary">Life</span>
-          </h1>
-        </div>
+        <h1 className="text-xl font-extrabold tracking-tight text-foreground">
+          Camp<span className="text-primary">Life</span>
+        </h1>
         <div className="flex items-center gap-1">
           {uniShortName && (
             <span className="text-[10px] font-bold tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-2">
               {uniShortName}
             </span>
           )}
-          <button
-            onClick={() => navigate("/notifications")}
-            className="relative p-2 text-foreground"
-          >
+          <button onClick={() => navigate("/notifications")} className="relative p-2 text-foreground">
             <Bell size={22} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
+                <span className="text-[9px] font-bold text-destructive-foreground">{unreadCount > 9 ? "9+" : unreadCount}</span>
+              </span>
+            )}
           </button>
         </div>
       </header>
 
-      {/* Stories */}
       <StoriesBar />
-
-      {/* Divider */}
       <div className="h-px bg-border" />
 
-      {/* Feed */}
       <div className="divide-y divide-border">
         {loading ? (
           <div className="flex justify-center py-20">
@@ -101,14 +59,10 @@ export default function Index() {
           <div className="text-center py-20 px-6">
             <p className="text-4xl mb-3">📸</p>
             <p className="font-semibold text-foreground">Your campus feed is empty</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Be the first to post! Tap the + button to share what's happening.
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Be the first to post! Tap the + button to share what's happening.</p>
           </div>
         ) : (
-          posts.map((post) => (
-            <PostCard key={post.id} post={post} onUpdate={fetchPosts} />
-          ))
+          posts.map((post) => <PostCard key={post.id} post={post} onUpdate={refresh} />)
         )}
       </div>
     </div>
