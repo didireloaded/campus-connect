@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Clock, Users, Calendar, CheckCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Users, Calendar, CheckCircle, Share2, MoreVertical } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 
-interface EventDetail {
+interface EventDetailData {
   id: string;
   title: string;
   description: string | null;
@@ -24,7 +24,7 @@ export default function EventDetail() {
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get("id");
   const { profile } = useAuth();
-  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [event, setEvent] = useState<EventDetailData | null>(null);
   const [attending, setAttending] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -58,6 +58,15 @@ export default function EventDetail() {
     }
   };
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/event-detail?id=${eventId}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: event?.title, url }); return; } catch {}
+    }
+    await navigator.clipboard.writeText(url);
+    toast.success("Link copied!");
+  };
+
   if (loading || !event) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
@@ -68,72 +77,86 @@ export default function EventDetail() {
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto">
-      {/* Cover image */}
-      <div className="relative h-56 bg-secondary">
-        {event.cover_image && (
-          <img src={event.cover_image} alt="" className="w-full h-full object-cover" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-        <button onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 bg-background/80 backdrop-blur rounded-full flex items-center justify-center">
+      {/* Header */}
+      <header className="sticky top-0 z-40 glass flex items-center justify-between px-4 py-3">
+        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-2xl bg-secondary flex items-center justify-center">
           <ArrowLeft size={18} className="text-foreground" />
         </button>
-      </div>
+        <h2 className="text-base font-bold text-foreground" style={{ fontFamily: "'DM Sans', sans-serif" }}>Event Details</h2>
+        <button onClick={handleShare} className="w-10 h-10 rounded-2xl bg-secondary flex items-center justify-center">
+          <Share2 size={16} className="text-foreground" />
+        </button>
+      </header>
 
-      <div className="px-4 -mt-10 relative z-10">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-xl font-bold text-foreground">{event.title}</h1>
-
+      {/* Event icon + title */}
+      <div className="px-5 pt-5 flex gap-4 items-start">
+        <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
+          <Calendar size={28} className="text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-extrabold text-foreground leading-tight">{event.title}</h1>
           {creator && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-6 h-6 rounded-full bg-secondary overflow-hidden">
-                {creator.avatar_url && <img src={creator.avatar_url} alt="" className="w-full h-full object-cover" />}
-              </div>
-              <span className="text-xs text-muted-foreground">by {creator.full_name || creator.username}</span>
-            </div>
+            <p className="text-[12px] text-muted-foreground mt-1.5">
+              by <span className="font-semibold text-foreground">{creator.full_name || creator.username}</span>
+            </p>
           )}
-
-          {/* Info cards */}
-          <div className="flex gap-3 mt-4">
-            <div className="flex-1 bg-card rounded-xl p-3 border border-border">
-              <Calendar size={14} className="text-primary mb-1" />
-              <p className="text-xs font-semibold text-foreground">{format(new Date(event.event_date), "MMM d, yyyy")}</p>
-              <p className="text-[10px] text-muted-foreground">{format(new Date(event.event_date), "h:mm a")}</p>
+          <div className="flex flex-col gap-1.5 mt-3">
+            <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+              <Clock size={13} className="text-muted-foreground shrink-0" />
+              {format(new Date(event.event_date), "EEE, MMM d · h:mm a")}
             </div>
             {event.location_name && (
-              <div className="flex-1 bg-card rounded-xl p-3 border border-border">
-                <MapPin size={14} className="text-primary mb-1" />
-                <p className="text-xs font-semibold text-foreground">{event.location_name}</p>
+              <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                <MapPin size={13} className="text-muted-foreground shrink-0" />
+                {event.location_name}
               </div>
             )}
-            <div className="flex-1 bg-card rounded-xl p-3 border border-border">
-              <Users size={14} className="text-primary mb-1" />
-              <p className="text-xs font-semibold text-foreground">{event.attendees_count || 0}</p>
-              <p className="text-[10px] text-muted-foreground">attending</p>
-            </div>
           </div>
+        </div>
+      </div>
 
-          {/* Description */}
-          {event.description && (
-            <div className="mt-4 bg-card rounded-xl p-4 border border-border">
-              <p className="text-xs font-bold text-foreground mb-2">About</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">{event.description}</p>
-            </div>
-          )}
+      {/* Cover image */}
+      <div className="mx-5 mt-5 rounded-2xl overflow-hidden bg-secondary aspect-video">
+        {event.cover_image ? (
+          <img src={event.cover_image} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Calendar size={48} className="text-muted-foreground/20" />
+          </div>
+        )}
+      </div>
 
-          {/* Attend button */}
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={toggleAttend}
-            className={`w-full py-3.5 rounded-2xl font-bold text-[15px] mt-6 mb-8 flex items-center justify-center gap-2 ${
-              attending
-                ? "bg-secondary text-foreground"
-                : "bg-primary text-primary-foreground"
-            }`}
-          >
-            {attending ? <><CheckCircle size={18} /> Attending</> : "I'm Going! 🎉"}
-          </motion.button>
-        </motion.div>
+      {/* About section */}
+      {event.description && (
+        <div className="px-5 mt-5">
+          <h3 className="text-base font-bold text-foreground mb-3" style={{ fontFamily: "'DM Sans', sans-serif" }}>About This Event</h3>
+          <div className="bg-secondary rounded-2xl p-4 border-l-[3px] border-primary">
+            <p className="text-[13px] text-foreground leading-relaxed">{event.description}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Attendees */}
+      <div className="px-5 mt-5">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Users size={15} />
+          <span className="font-semibold text-foreground">{event.attendees_count || 0}</span> people attending
+        </div>
+      </div>
+
+      {/* RSVP Button */}
+      <div className="px-5 pt-6 pb-10">
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={toggleAttend}
+          className={`w-full py-4 rounded-full font-bold text-[15px] flex items-center justify-center gap-2 transition-all ${
+            attending
+              ? "bg-secondary text-foreground"
+              : "bg-primary text-primary-foreground shadow-glow"
+          }`}
+        >
+          {attending ? <><CheckCircle size={18} /> Attending</> : "RSVP 🎉"}
+        </motion.button>
       </div>
     </div>
   );
