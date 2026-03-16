@@ -68,13 +68,20 @@ export const postService = {
   },
 
   async createPost(params: { userId: string; universityId: string; content: string; imageUrl?: string }) {
-    const { error } = await supabase.from("posts").insert({
+    const { data: post, error } = await supabase.from("posts").insert({
       user_id: params.userId,
       university_id: params.universityId,
       content: params.content,
       image_url: params.imageUrl || null,
-    });
+    }).select("id").single();
     if (error) throw error;
+
+    // Trigger AI moderation in background
+    if (post && params.content) {
+      supabase.functions.invoke("moderate-content", {
+        body: { content: params.content, content_type: "post", content_id: post.id },
+      }).catch((err) => console.error("Moderation call failed:", err));
+    }
   },
 
   async deletePost(postId: string) {
