@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import Wall from "./pages/Wall";
 import Events from "./pages/Events";
+import Marketplace from "./pages/Marketplace";
 import MapPage from "./pages/MapPage";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
@@ -49,6 +50,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Index />} />
         <Route path="/wall" element={<Wall />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
