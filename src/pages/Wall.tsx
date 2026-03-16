@@ -60,7 +60,8 @@ export default function Wall() {
     const { error } = await supabase.from("wall_posts").insert({
       university_id: profile.university_id,
       content: content.trim(),
-    });
+      alias: generateAlias(),
+    } as any);
     if (error) toast.error("Failed to post");
     else { setContent(""); fetchPosts(); }
     setPosting(false);
