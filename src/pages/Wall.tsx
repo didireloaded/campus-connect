@@ -8,10 +8,23 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 
+const GHOST_NAMES = [
+  "GhostFox", "MidnightLion", "CampusGhost", "ShadowOwl", "NightWolf",
+  "PhantomEagle", "SilentViper", "MysticRaven", "HiddenPanther", "StealthHawk",
+  "DarkFalcon", "GhostPanda", "NeonTiger", "CryptoLynx", "SilverFox",
+];
+
+const generateAlias = () => {
+  const name = GHOST_NAMES[Math.floor(Math.random() * GHOST_NAMES.length)];
+  const num = Math.floor(Math.random() * 99) + 1;
+  return `${name}${num}`;
+};
+
 interface WallPost {
   id: string;
   content: string;
   upvotes: number;
+  alias: string | null;
   created_at: string;
 }
 
@@ -47,7 +60,8 @@ export default function Wall() {
     const { error } = await supabase.from("wall_posts").insert({
       university_id: profile.university_id,
       content: content.trim(),
-    });
+      alias: generateAlias(),
+    } as any);
     if (error) toast.error("Failed to post");
     else { setContent(""); fetchPosts(); }
     setPosting(false);
@@ -119,6 +133,9 @@ export default function Wall() {
               transition={{ delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
               className="bg-muted/10 rounded-xl p-4 border border-muted/10"
             >
+              {post.alias && (
+                <p className="text-xs font-semibold text-campus-orange/80 mb-1.5">🎭 {post.alias}</p>
+              )}
               <p className="text-sm text-primary-foreground/90 leading-relaxed">{post.content}</p>
               <div className="flex items-center justify-between mt-3">
                 <span className="text-xs text-muted-foreground">
