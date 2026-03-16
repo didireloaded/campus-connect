@@ -225,30 +225,27 @@ export type Database = {
         Row: {
           actor_id: string | null
           created_at: string | null
-          event_id: string | null
           id: string
-          post_id: string | null
           read: boolean | null
+          reference_id: string | null
           type: string
           user_id: string
         }
         Insert: {
           actor_id?: string | null
           created_at?: string | null
-          event_id?: string | null
           id?: string
-          post_id?: string | null
           read?: boolean | null
+          reference_id?: string | null
           type: string
           user_id: string
         }
         Update: {
           actor_id?: string | null
           created_at?: string | null
-          event_id?: string | null
           id?: string
-          post_id?: string | null
           read?: boolean | null
+          reference_id?: string | null
           type?: string
           user_id?: string
         }
@@ -258,20 +255,6 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
           {
@@ -383,52 +366,38 @@ export type Database = {
       }
       reports: {
         Row: {
+          content_id: string | null
+          content_type: string | null
           created_at: string | null
           id: string
-          post_id: string | null
           reason: string
           reporter_id: string
           status: string | null
-          wall_post_id: string | null
         }
         Insert: {
+          content_id?: string | null
+          content_type?: string | null
           created_at?: string | null
           id?: string
-          post_id?: string | null
           reason: string
           reporter_id: string
           status?: string | null
-          wall_post_id?: string | null
         }
         Update: {
+          content_id?: string | null
+          content_type?: string | null
           created_at?: string | null
           id?: string
-          post_id?: string | null
           reason?: string
           reporter_id?: string
           status?: string | null
-          wall_post_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "reports_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "reports_reporter_id_fkey"
             columns: ["reporter_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reports_wall_post_id_fkey"
-            columns: ["wall_post_id"]
-            isOneToOne: false
-            referencedRelation: "wall_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -480,30 +449,40 @@ export type Database = {
       }
       universities: {
         Row: {
+          city: string | null
+          country: string | null
           created_at: string | null
           domain: string | null
           id: string
           logo_url: string | null
           name: string
+          short_name: string | null
         }
         Insert: {
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           domain?: string | null
           id?: string
           logo_url?: string | null
           name: string
+          short_name?: string | null
         }
         Update: {
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           domain?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          short_name?: string | null
         }
         Relationships: []
       }
       wall_posts: {
         Row: {
+          alias: string | null
           content: string
           created_at: string | null
           id: string
@@ -511,6 +490,7 @@ export type Database = {
           upvotes: number | null
         }
         Insert: {
+          alias?: string | null
           content: string
           created_at?: string | null
           id?: string
@@ -518,6 +498,7 @@ export type Database = {
           upvotes?: number | null
         }
         Update: {
+          alias?: string | null
           content?: string
           created_at?: string | null
           id?: string
