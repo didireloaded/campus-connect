@@ -4,7 +4,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PostCard } from "@/components/feed/PostCard";
 import { StoriesBar } from "@/components/feed/StoriesBar";
-import { Bell, Loader2 } from "lucide-react";
+import { Bell, Loader2, Compass } from "lucide-react";
 import { useEffect, useState } from "react";
 import { profileService } from "@/services/profileService";
 
@@ -39,6 +39,9 @@ export default function Index() {
           )}
         </div>
         <div className="flex items-center gap-1">
+          <button onClick={() => navigate("/explore")} className="p-2 text-foreground">
+            <Compass size={22} />
+          </button>
           <button onClick={() => navigate("/notifications")} className="relative p-2 text-foreground">
             <Bell size={22} />
             {unreadCount > 0 && (
