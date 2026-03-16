@@ -1,47 +1,13 @@
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useStories } from "@/hooks/useStories";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus } from "lucide-react";
 
-interface StoryGroup {
-  user_id: string;
-  username: string;
-  avatar_url: string | null;
-  story_count: number;
-}
-
 export const StoriesBar = () => {
   const { user, profile } = useAuth();
-  const [stories, setStories] = useState<StoryGroup[]>([]);
+  const { stories } = useStories();
 
-  useEffect(() => {
-    const fetchStories = async () => {
-      // Get distinct users who have active stories in the same university
-      const { data } = await supabase
-        .from("stories")
-        .select("user_id, profiles(username, avatar_url)")
-        .order("created_at", { ascending: false });
-
-      if (data) {
-        const grouped = new Map<string, StoryGroup>();
-        for (const s of data as any[]) {
-          if (!grouped.has(s.user_id)) {
-            grouped.set(s.user_id, {
-              user_id: s.user_id,
-              username: s.profiles?.username || "user",
-              avatar_url: s.profiles?.avatar_url,
-              story_count: 1,
-            });
-          } else {
-            grouped.get(s.user_id)!.story_count++;
-          }
-        }
-        setStories(Array.from(grouped.values()));
-      }
-    };
-    fetchStories();
-  }, []);
+  const otherStories = stories.filter((s) => s.user_id !== user?.id);
 
   return (
     <div className="px-4 py-3">
@@ -63,28 +29,24 @@ export const StoriesBar = () => {
         </div>
 
         {/* Other Stories */}
-        {stories
-          .filter((s) => s.user_id !== user?.id)
-          .map((story) => (
-            <div key={story.user_id} className="flex flex-col items-center gap-1 shrink-0 cursor-pointer">
-              <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-campus-orange via-destructive to-campus-purple">
-                <div className="w-full h-full rounded-full bg-background p-0.5">
-                  <Avatar className="w-full h-full">
-                    <AvatarImage src={story.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                      {story.username[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
+        {otherStories.map((story) => (
+          <div key={story.user_id} className="flex flex-col items-center gap-1 shrink-0 cursor-pointer">
+            <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-campus-orange via-destructive to-campus-purple">
+              <div className="w-full h-full rounded-full bg-background p-0.5">
+                <Avatar className="w-full h-full">
+                  <AvatarImage src={story.avatar_url || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                    {story.username[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </div>
-              <span className="text-[10px] text-foreground font-medium max-w-[60px] truncate">
-                {story.username}
-              </span>
             </div>
-          ))}
+            <span className="text-[10px] text-foreground font-medium max-w-[60px] truncate">{story.username}</span>
+          </div>
+        ))}
 
-        {/* Placeholder stories when empty */}
-        {stories.filter((s) => s.user_id !== user?.id).length === 0 &&
+        {/* Placeholder when empty */}
+        {otherStories.length === 0 &&
           Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex flex-col items-center gap-1 shrink-0">
               <div className="w-16 h-16 rounded-full bg-secondary animate-pulse" />
