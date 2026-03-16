@@ -13,6 +13,7 @@ import MapPage from "./pages/MapPage";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -37,6 +38,9 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
+      <Route path="/admin" element={
+        <ProtectedRoute><Admin /></ProtectedRoute>
+      } />
       <Route path="/notifications" element={
         <ProtectedRoute><Notifications /></ProtectedRoute>
       } />

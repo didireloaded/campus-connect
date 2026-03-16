@@ -21,6 +21,33 @@ export interface PostWithProfile extends PostRow {
 
 export const postService = {
   async fetchFeed(limit = 30) {
+    // Use ranked feed - get user's university_id first
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase.from("profiles").select("university_id").eq("id", user.id).maybeSingle();
+      if (profile?.university_id) {
+        const { data: ranked, error: rpcError } = await supabase.rpc("get_ranked_feed", {
+          p_university_id: profile.university_id,
+          p_limit: limit,
+          p_offset: 0,
+        });
+        if (!rpcError && ranked && ranked.length > 0) {
+          // Fetch profiles for ranked posts
+          const ids = ranked.map((p: any) => p.id);
+          const { data: withProfiles } = await supabase
+            .from("posts")
+            .select("*, profiles(username, avatar_url, full_name)")
+            .in("id", ids);
+          if (withProfiles) {
+            // Re-sort by ranked order
+            const idOrder = new Map(ids.map((id: string, i: number) => [id, i]));
+            const sorted = [...withProfiles].sort((a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0));
+            return sorted as unknown as PostWithProfile[];
+          }
+        }
+      }
+    }
+    // Fallback to chronological
     const { data, error } = await supabase
       .from("posts")
       .select("*, profiles(username, avatar_url, full_name)")
@@ -41,13 +68,20 @@ export const postService = {
   },
 
   async createPost(params: { userId: string; universityId: string; content: string; imageUrl?: string }) {
-    const { error } = await supabase.from("posts").insert({
+    const { data: post, error } = await supabase.from("posts").insert({
       user_id: params.userId,
       university_id: params.universityId,
       content: params.content,
       image_url: params.imageUrl || null,
-    });
+    }).select("id").single();
     if (error) throw error;
+
+    // Trigger AI moderation in background
+    if (post && params.content) {
+      supabase.functions.invoke("moderate-content", {
+        body: { content: params.content, content_type: "post", content_id: post.id },
+      }).catch((err) => console.error("Moderation call failed:", err));
+    }
   },
 
   async deletePost(postId: string) {

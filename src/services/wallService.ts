@@ -35,12 +35,19 @@ export const wallService = {
 
   async createPost(universityId: string, content: string) {
     const alias = generateAlias();
-    const { error } = await supabase.from("wall_posts").insert({
+    const { data: post, error } = await supabase.from("wall_posts").insert({
       university_id: universityId,
       content,
       alias,
-    } as any);
+    } as any).select("id").single();
     if (error) throw error;
+
+    // Trigger AI moderation in background
+    if (post) {
+      supabase.functions.invoke("moderate-content", {
+        body: { content, content_type: "wall_post", content_id: post.id },
+      }).catch((err) => console.error("Moderation call failed:", err));
+    }
   },
 
   async upvote(wallPostId: string, userId: string) {
