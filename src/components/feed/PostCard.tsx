@@ -341,7 +341,7 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
       <motion.article
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card relative"
+        className="bg-card relative rounded-2xl border border-border/50 shadow-card overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3">
