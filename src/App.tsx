@@ -14,6 +14,15 @@ import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import LostFound from "./pages/LostFound";
+import Rides from "./pages/Rides";
+import StudyGroups from "./pages/StudyGroups";
+import LectureNotes from "./pages/LectureNotes";
+import Polls from "./pages/Polls";
+import Confessions from "./pages/Confessions";
+import Jobs from "./pages/Jobs";
+import Clubs from "./pages/Clubs";
+import Explore from "./pages/Explore";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -21,7 +30,6 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -29,7 +37,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-
   if (!session) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 };
@@ -38,12 +45,16 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={<Auth />} />
-      <Route path="/admin" element={
-        <ProtectedRoute><Admin /></ProtectedRoute>
-      } />
-      <Route path="/notifications" element={
-        <ProtectedRoute><Notifications /></ProtectedRoute>
-      } />
+      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+      <Route path="/lost-found" element={<ProtectedRoute><LostFound /></ProtectedRoute>} />
+      <Route path="/rides" element={<ProtectedRoute><Rides /></ProtectedRoute>} />
+      <Route path="/study-groups" element={<ProtectedRoute><StudyGroups /></ProtectedRoute>} />
+      <Route path="/lecture-notes" element={<ProtectedRoute><LectureNotes /></ProtectedRoute>} />
+      <Route path="/polls" element={<ProtectedRoute><Polls /></ProtectedRoute>} />
+      <Route path="/confessions" element={<ProtectedRoute><Confessions /></ProtectedRoute>} />
+      <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+      <Route path="/clubs" element={<ProtectedRoute><Clubs /></ProtectedRoute>} />
       <Route
         element={
           <ProtectedRoute>
@@ -55,6 +66,7 @@ const AppRoutes = () => {
         <Route path="/wall" element={<Wall />} />
         <Route path="/events" element={<Events />} />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/explore" element={<Explore />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
