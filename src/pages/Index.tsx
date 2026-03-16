@@ -4,7 +4,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PostCard } from "@/components/feed/PostCard";
 import { StoriesBar } from "@/components/feed/StoriesBar";
-import { Bell, Loader2 } from "lucide-react";
+import { Bell, Loader2, Compass } from "lucide-react";
 import { useEffect, useState } from "react";
 import { profileService } from "@/services/profileService";
 
