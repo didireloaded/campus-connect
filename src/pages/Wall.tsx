@@ -8,10 +8,23 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 
+const GHOST_NAMES = [
+  "GhostFox", "MidnightLion", "CampusGhost", "ShadowOwl", "NightWolf",
+  "PhantomEagle", "SilentViper", "MysticRaven", "HiddenPanther", "StealthHawk",
+  "DarkFalcon", "GhostPanda", "NeonTiger", "CryptoLynx", "SilverFox",
+];
+
+const generateAlias = () => {
+  const name = GHOST_NAMES[Math.floor(Math.random() * GHOST_NAMES.length)];
+  const num = Math.floor(Math.random() * 99) + 1;
+  return `${name}${num}`;
+};
+
 interface WallPost {
   id: string;
   content: string;
   upvotes: number;
+  alias: string | null;
   created_at: string;
 }
 
