@@ -25,6 +25,7 @@ import Clubs from "./pages/Clubs";
 import Explore from "./pages/Explore";
 import StoryViewer from "./pages/StoryViewer";
 import EventDetail from "./pages/EventDetail";
+import UserProfilePage from "./pages/UserProfilePage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
