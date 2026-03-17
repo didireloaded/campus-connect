@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, BookOpen, Users, UserPlus, LogOut } from "lucide-react";
+import { ArrowLeft, Plus, BookOpen, Users, UserPlus, LogOut, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -101,10 +101,18 @@ export default function StudyGroups() {
                     <Users size={10} /> {g.members_count}/{g.max_members} members
                   </p>
                 </div>
-                <button onClick={() => toggleJoin(g.id)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold ${isMember ? "bg-secondary text-muted-foreground" : "bg-primary text-primary-foreground"}`}>
-                  {isMember ? <><LogOut size={12} /> Leave</> : <><UserPlus size={12} /> Join</>}
-                </button>
+                <div className="flex flex-col gap-2 items-end">
+                  <button onClick={() => toggleJoin(g.id)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold ${isMember ? "bg-secondary text-muted-foreground" : "bg-primary text-primary-foreground"}`}>
+                    {isMember ? <><LogOut size={12} /> Leave</> : <><UserPlus size={12} /> Join</>}
+                  </button>
+                  {isMember && (
+                    <button onClick={() => navigate(`/study-group?id=${g.id}`)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary">
+                      <MessageCircle size={12} /> Chat
+                    </button>
+                  )}
+                </div>
               </div>
             </motion.div>
           );
