@@ -355,6 +355,35 @@ export type Database = {
           },
         ]
       }
+      lecture_note_upvotes: {
+        Row: {
+          created_at: string | null
+          id: string
+          note_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          note_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          note_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lecture_note_upvotes_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "lecture_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lecture_notes: {
         Row: {
           course: string | null
@@ -366,6 +395,7 @@ export type Database = {
           id: string
           title: string
           university_id: string
+          upvotes_count: number | null
           user_id: string
         }
         Insert: {
@@ -378,6 +408,7 @@ export type Database = {
           id?: string
           title: string
           university_id: string
+          upvotes_count?: number | null
           user_id: string
         }
         Update: {
@@ -390,6 +421,7 @@ export type Database = {
           id?: string
           title?: string
           university_id?: string
+          upvotes_count?: number | null
           user_id?: string
         }
         Relationships: [
@@ -488,10 +520,14 @@ export type Database = {
       marketplace_listings: {
         Row: {
           category: string
+          condition: string | null
           created_at: string | null
           description: string | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
+          payment_methods: string[] | null
+          pickup_location: string | null
           price: number
           seller_id: string
           status: string
@@ -500,10 +536,14 @@ export type Database = {
         }
         Insert: {
           category?: string
+          condition?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
+          payment_methods?: string[] | null
+          pickup_location?: string | null
           price: number
           seller_id: string
           status?: string
@@ -512,10 +552,14 @@ export type Database = {
         }
         Update: {
           category?: string
+          condition?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
+          payment_methods?: string[] | null
+          pickup_location?: string | null
           price?: number
           seller_id?: string
           status?: string
@@ -803,41 +847,62 @@ export type Database = {
         Row: {
           created_at: string | null
           departure_time: string
+          departure_window_end: string | null
           description: string | null
+          from_lat: number | null
+          from_lng: number | null
           from_location: string
           id: string
           price: number | null
+          role: string | null
           seats_available: number
           status: string
+          to_lat: number | null
+          to_lng: number | null
           to_location: string
           university_id: string
           user_id: string
+          vehicle_desc: string | null
         }
         Insert: {
           created_at?: string | null
           departure_time: string
+          departure_window_end?: string | null
           description?: string | null
+          from_lat?: number | null
+          from_lng?: number | null
           from_location: string
           id?: string
           price?: number | null
+          role?: string | null
           seats_available?: number
           status?: string
+          to_lat?: number | null
+          to_lng?: number | null
           to_location: string
           university_id: string
           user_id: string
+          vehicle_desc?: string | null
         }
         Update: {
           created_at?: string | null
           departure_time?: string
+          departure_window_end?: string | null
           description?: string | null
+          from_lat?: number | null
+          from_lng?: number | null
           from_location?: string
           id?: string
           price?: number | null
+          role?: string | null
           seats_available?: number
           status?: string
+          to_lat?: number | null
+          to_lng?: number | null
           to_location?: string
           university_id?: string
           user_id?: string
+          vehicle_desc?: string | null
         }
         Relationships: [
           {
@@ -845,6 +910,88 @@ export type Database = {
             columns: ["university_id"]
             isOneToOne: false
             referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spotted_posts: {
+        Row: {
+          alias: string | null
+          created_at: string | null
+          description: string
+          id: string
+          image_url: string | null
+          is_anonymous: boolean | null
+          location: string
+          spotted_time: string | null
+          title: string
+          university_id: string
+          user_id: string
+        }
+        Insert: {
+          alias?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          image_url?: string | null
+          is_anonymous?: boolean | null
+          location: string
+          spotted_time?: string | null
+          title: string
+          university_id: string
+          user_id: string
+        }
+        Update: {
+          alias?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          image_url?: string | null
+          is_anonymous?: boolean | null
+          location?: string
+          spotted_time?: string | null
+          title?: string
+          university_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotted_posts_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spotted_reactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string | null
+          reaction: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          reaction: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          reaction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotted_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "spotted_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -897,6 +1044,51 @@ export type Database = {
           },
         ]
       }
+      study_group_announcements: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string | null
+          group_id: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string | null
+          group_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_group_announcements_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_group_members: {
         Row: {
           group_id: string
@@ -922,6 +1114,54 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_group_messages: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          file_name: string | null
+          file_url: string | null
+          group_id: string | null
+          id: string
+          message_type: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          group_id?: string | null
+          id?: string
+          message_type?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          group_id?: string | null
+          id?: string
+          message_type?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_group_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
