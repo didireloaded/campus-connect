@@ -23,8 +23,10 @@ import Confessions from "./pages/Confessions";
 import Jobs from "./pages/Jobs";
 import Clubs from "./pages/Clubs";
 import Explore from "./pages/Explore";
+import Spotted from "./pages/Spotted";
 import StoryViewer from "./pages/StoryViewer";
 import EventDetail from "./pages/EventDetail";
+import StudyGroupDetail from "./pages/StudyGroupDetail";
 import UserProfilePage from "./pages/UserProfilePage";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
@@ -49,15 +51,17 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/lost-found" element={<ProtectedRoute><LostFound /></ProtectedRoute>} />
       <Route path="/rides" element={<ProtectedRoute><Rides /></ProtectedRoute>} />
       <Route path="/study-groups" element={<ProtectedRoute><StudyGroups /></ProtectedRoute>} />
+      <Route path="/study-group" element={<ProtectedRoute><StudyGroupDetail /></ProtectedRoute>} />
       <Route path="/lecture-notes" element={<ProtectedRoute><LectureNotes /></ProtectedRoute>} />
       <Route path="/polls" element={<ProtectedRoute><Polls /></ProtectedRoute>} />
       <Route path="/confessions" element={<ProtectedRoute><Confessions /></ProtectedRoute>} />
       <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
       <Route path="/clubs" element={<ProtectedRoute><Clubs /></ProtectedRoute>} />
+      <Route path="/spotted" element={<ProtectedRoute><Spotted /></ProtectedRoute>} />
+      <Route path="/wall" element={<ProtectedRoute><Wall /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
       <Route path="/event-detail" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
       <Route path="/profile/:username" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
@@ -69,11 +73,11 @@ const AppRoutes = () => {
         }
       >
         <Route path="/" element={<Index />} />
-        <Route path="/wall" element={<Wall />} />
+        <Route path="/discover" element={<Explore />} />
         <Route path="/events" element={<Events />} />
         <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/explore" element={<Explore />} />
         <Route path="/map" element={<MapPage />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<NotFound />} />

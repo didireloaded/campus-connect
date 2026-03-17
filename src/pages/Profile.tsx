@@ -4,13 +4,14 @@ import { postService, PostWithProfile } from "@/services/postService";
 import { profileService } from "@/services/profileService";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, LogOut, Grid3X3, Loader2, MapPin, Camera, X, Check, CalendarDays, Heart } from "lucide-react";
+import { Settings, LogOut, Grid3X3, Loader2, MapPin, Camera, X, Check, CalendarDays, ShoppingBag, FileText, Bookmark } from "lucide-react";
 import { PostCard } from "@/components/feed/PostCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
+import { formatDistanceToNow } from "date-fns";
 
 // ─── Edit Profile Sheet ───────────────────────────────────────────────────────
 
@@ -84,26 +85,15 @@ function EditProfileSheet({
     <AnimatePresence>
       {open && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+          <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-3xl shadow-2xl pb-safe"
-          >
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 bg-border rounded-full" />
-            </div>
+            className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-3xl shadow-2xl pb-safe">
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 bg-border rounded-full" /></div>
             <div className="flex items-center justify-between px-4 pb-3 border-b border-border">
               <button onClick={onClose} className="text-muted-foreground"><X size={20} /></button>
-              <h3 className="font-bold text-foreground" style={{ fontFamily: "'DM Sans', sans-serif" }}>Edit Profile</h3>
+              <h3 className="font-bold text-foreground">Edit Profile</h3>
               <button onClick={handleSave} disabled={saving} className="text-primary font-semibold text-sm flex items-center gap-1.5 disabled:opacity-50">
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Save
               </button>
@@ -115,10 +105,8 @@ function EditProfileSheet({
                     <AvatarImage src={currentAvatar} />
                     <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">{initials}</AvatarFallback>
                   </Avatar>
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-glow"
-                  >
+                  <button onClick={() => fileRef.current?.click()}
+                    className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-glow">
                     <Camera size={14} className="text-primary-foreground" />
                   </button>
                 </div>
@@ -150,7 +138,7 @@ function EditProfileSheet({
 
 // ─── Profile Page ─────────────────────────────────────────────────────────────
 
-type ProfileTab = "posts" | "events" | "favorites";
+type ProfileTab = "posts" | "events" | "listings" | "notes" | "saved";
 
 export default function Profile() {
   const { user, profile, signOut } = useAuth();
@@ -161,6 +149,10 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
   const [attendedEvents, setAttendedEvents] = useState<any[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
+  const [listings, setListings] = useState<any[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(false);
+  const [notes, setNotes] = useState<any[]>([]);
+  const [notesLoading, setNotesLoading] = useState(false);
 
   const loadPosts = () => {
     if (!user) return;
@@ -179,6 +171,30 @@ export default function Profile() {
     setEventsLoading(false);
   };
 
+  const loadListings = async () => {
+    if (!user) return;
+    setListingsLoading(true);
+    const { data } = await supabase
+      .from("marketplace_listings")
+      .select("*")
+      .eq("seller_id", user.id)
+      .order("created_at", { ascending: false });
+    setListings(data || []);
+    setListingsLoading(false);
+  };
+
+  const loadNotes = async () => {
+    if (!user) return;
+    setNotesLoading(true);
+    const { data } = await supabase
+      .from("lecture_notes")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    setNotes(data || []);
+    setNotesLoading(false);
+  };
+
   useEffect(() => {
     loadPosts();
     if (profile?.university_id) {
@@ -190,6 +206,8 @@ export default function Profile() {
 
   useEffect(() => {
     if (activeTab === "events" && attendedEvents.length === 0) loadAttendedEvents();
+    if (activeTab === "listings" && listings.length === 0) loadListings();
+    if (activeTab === "notes" && notes.length === 0) loadNotes();
   }, [activeTab]);
 
   const initials = profile?.full_name
@@ -198,14 +216,16 @@ export default function Profile() {
 
   const tabs: { key: ProfileTab; label: string; icon: React.ReactNode }[] = [
     { key: "posts", label: "Posts", icon: <Grid3X3 size={14} /> },
-    { key: "events", label: "RSVPs", icon: <CalendarDays size={14} /> },
-    { key: "favorites", label: "Favorites", icon: <Heart size={14} /> },
+    { key: "events", label: "Events", icon: <CalendarDays size={14} /> },
+    { key: "listings", label: "Listings", icon: <ShoppingBag size={14} /> },
+    { key: "notes", label: "Notes", icon: <FileText size={14} /> },
+    { key: "saved", label: "Saved", icon: <Bookmark size={14} /> },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 glass px-5 py-3 flex items-center justify-between">
-        <h2 className="text-base font-bold text-foreground" style={{ fontFamily: "'DM Sans', sans-serif" }}>Profile</h2>
+        <h2 className="text-base font-bold text-foreground">Profile</h2>
         <div className="flex items-center gap-3">
           <DarkModeToggle />
           <button onClick={() => setEditOpen(true)} className="text-foreground"><Settings size={20} /></button>
@@ -214,17 +234,14 @@ export default function Profile() {
       </header>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-5">
-        {/* Avatar + stats */}
         <div className="text-center">
           <div className="relative inline-block">
             <Avatar className="h-24 w-24 ring-[3px] ring-primary">
               <AvatarImage src={profile?.avatar_url || undefined} />
               <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">{initials}</AvatarFallback>
             </Avatar>
-            <button
-              onClick={() => setEditOpen(true)}
-              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-glow"
-            >
+            <button onClick={() => setEditOpen(true)}
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-glow">
               <Camera size={14} className="text-primary-foreground" />
             </button>
           </div>
@@ -238,7 +255,6 @@ export default function Profile() {
           {profile?.bio && <p className="text-[13px] text-foreground mt-2 px-6 leading-relaxed">{profile.bio}</p>}
         </div>
 
-        {/* Stats row */}
         <div className="flex justify-center gap-10 mt-5">
           <div className="text-center">
             <p className="text-lg font-extrabold text-foreground">{posts.length}</p>
@@ -254,22 +270,19 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Edit profile button */}
-        <button
-          onClick={() => setEditOpen(true)}
-          className="w-full mt-5 py-2 rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground hover:bg-accent transition-colors"
-        >
+        <button onClick={() => setEditOpen(true)}
+          className="w-full mt-5 py-2 rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground hover:bg-accent transition-colors">
           Edit Profile
         </button>
       </motion.div>
 
-      {/* Segmented tabs */}
-      <div className="mx-5 mb-4 bg-secondary rounded-2xl p-1 flex h-11">
+      {/* Segmented tabs - scrollable for 5 tabs */}
+      <div className="mx-5 mb-4 bg-secondary rounded-2xl p-1 flex h-11 overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl text-[12px] font-semibold transition-all ${
+            className={`flex-1 min-w-0 flex items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition-all whitespace-nowrap px-2 ${
               activeTab === tab.key
                 ? "bg-primary text-primary-foreground shadow-glow"
                 : "text-muted-foreground hover:text-foreground"
@@ -288,11 +301,7 @@ export default function Profile() {
             {loading ? (
               <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
             ) : posts.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-4xl mb-2">📷</p>
-                <p className="text-sm font-semibold text-foreground">No Posts Yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Share your first campus moment</p>
-              </div>
+              <EmptyState emoji="📷" title="No Posts Yet" desc="Share your first campus moment" />
             ) : (
               posts.map((post) => <PostCard key={post.id} post={post} onUpdate={loadPosts} />)
             )}
@@ -304,11 +313,7 @@ export default function Profile() {
             {eventsLoading ? (
               <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
             ) : attendedEvents.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-4xl mb-2">🗓️</p>
-                <p className="text-sm font-semibold text-foreground">No RSVPs Yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Events you RSVP to will appear here</p>
-              </div>
+              <EmptyState emoji="🗓️" title="No RSVPs Yet" desc="Events you RSVP to will appear here" />
             ) : (
               attendedEvents.map((ev: any) => (
                 <div key={ev.id} className="bg-card rounded-2xl p-4 border border-border/50 shadow-card flex gap-3 items-start">
@@ -326,26 +331,84 @@ export default function Profile() {
                       </p>
                     )}
                   </div>
+                  <span className="text-[10px] bg-emerald-500/15 text-emerald-600 px-2 py-0.5 rounded-full font-semibold">Attending</span>
                 </div>
               ))
             )}
           </div>
         )}
 
-        {activeTab === "favorites" && (
-          <div className="text-center py-12">
-            <p className="text-4xl mb-2">❤️</p>
-            <p className="text-sm font-semibold text-foreground">Favorites</p>
-            <p className="text-xs text-muted-foreground mt-1">Posts you've liked will appear here</p>
+        {activeTab === "listings" && (
+          <div className="px-4 space-y-3">
+            {listingsLoading ? (
+              <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
+            ) : listings.length === 0 ? (
+              <EmptyState emoji="🛍️" title="No Listings" desc="Tap + Sell Item to list something" />
+            ) : (
+              listings.map((listing: any) => (
+                <div key={listing.id} className="bg-card rounded-2xl p-4 border border-border/50 shadow-card flex gap-3 items-start">
+                  <div className="w-11 h-11 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
+                    <ShoppingBag size={18} className="text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground truncate">{listing.title}</p>
+                    <p className="text-base font-extrabold text-primary mt-0.5">N${Number(listing.price).toFixed(0)}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {formatDistanceToNow(new Date(listing.created_at), { addSuffix: true })}
+                    </p>
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                    listing.status === "active" ? "bg-emerald-500/15 text-emerald-600" : "bg-secondary text-muted-foreground"
+                  }`}>
+                    {listing.status === "active" ? "Active" : listing.status === "sold" ? "Sold" : listing.status}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
+        )}
+
+        {activeTab === "notes" && (
+          <div className="px-4 space-y-3">
+            {notesLoading ? (
+              <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
+            ) : notes.length === 0 ? (
+              <EmptyState emoji="📄" title="No Notes Uploaded" desc="Share your notes to help your campus" />
+            ) : (
+              notes.map((note: any) => (
+                <div key={note.id} className="bg-card rounded-2xl p-4 border border-border/50 shadow-card flex gap-3 items-start">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+                    <FileText size={18} className="text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground truncate">{note.title}</p>
+                    {note.course && <p className="text-xs text-primary font-medium">{note.course}</p>}
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {note.file_type?.toUpperCase()} • {note.downloads_count || 0} downloads
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === "saved" && (
+          <EmptyState emoji="🔖" title="Saved Items" desc="Bookmarked notes and events will appear here" />
         )}
       </div>
 
-      <EditProfileSheet
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        onSaved={loadPosts}
-      />
+      <EditProfileSheet open={editOpen} onClose={() => setEditOpen(false)} onSaved={loadPosts} />
+    </div>
+  );
+}
+
+function EmptyState({ emoji, title, desc }: { emoji: string; title: string; desc: string }) {
+  return (
+    <div className="text-center py-12 px-4">
+      <p className="text-4xl mb-2">{emoji}</p>
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="text-xs text-muted-foreground mt-1">{desc}</p>
     </div>
   );
 }
