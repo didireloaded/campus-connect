@@ -4,26 +4,29 @@ import { usePosts } from "@/hooks/usePosts";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PostCard } from "@/components/feed/PostCard";
 import { StoriesBar } from "@/components/feed/StoriesBar";
-import { Bell, Loader2, Compass, Search } from "lucide-react";
+import { Bell, Loader2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { profileService } from "@/services/profileService";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getUniConfig } from "@/config/universities";
 
 export default function Index() {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const { posts, loading, refresh } = usePosts();
   const { unreadCount } = useNotifications();
-  const [uniName, setUniName] = useState("");
+  const [uniShortName, setUniShortName] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile?.university_id) {
       profileService.getUniversity(profile.university_id).then((uni) => {
-        setUniName((uni as any).short_name || (uni as any).name || "Campus");
+        setUniShortName((uni as any).short_name || null);
       }).catch(() => {});
     }
   }, [profile]);
+
+  const uniConfig = getUniConfig(uniShortName);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -50,8 +53,11 @@ export default function Index() {
             </Avatar>
             <div>
               <p className="text-[11px] text-muted-foreground font-medium">{greeting()}</p>
-              <h2 className="text-base font-bold text-foreground leading-tight" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                {profile?.full_name || profile?.username || "Student"}
+              <h2 className="text-base font-bold text-foreground leading-tight flex items-center gap-1.5">
+                {uniShortName && (
+                  <img src={uniConfig.logo} alt={uniConfig.shortName} className="w-5 h-5 object-contain" />
+                )}
+                {uniShortName ? `${uniConfig.shortName} Feed` : (profile?.full_name || profile?.username || "Student")}
               </h2>
             </div>
           </div>

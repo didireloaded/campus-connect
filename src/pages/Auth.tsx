@@ -19,8 +19,7 @@ function getColorsForUni(uni: University) {
   return cfg.colors;
 }
 
-// Fixed 2x2 grid order
-const UNI_ORDER = ["UNAM", "NUST", "IUM", "Welwitchia"];
+// UNI_ORDER imported from config
 
 export default function Auth() {
   const { session } = useAuth();

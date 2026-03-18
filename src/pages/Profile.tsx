@@ -252,9 +252,10 @@ export default function Profile() {
           <h1 className="text-xl font-extrabold text-foreground mt-3">{profile?.full_name || profile?.username}</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">@{profile?.username}</p>
           {universityName && (
-            <p className="text-[12px] text-primary font-semibold mt-2 flex items-center justify-center gap-1">
-              <MapPin size={12} /> {universityName}
-            </p>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <img src={getUniConfig(uniShortName).logo} alt={universityName} className="w-5 h-5 object-contain" />
+              <p className="text-[12px] text-primary font-semibold">{universityName}</p>
+            </div>
           )}
           {profile?.bio && <p className="text-[13px] text-foreground mt-2 px-6 leading-relaxed">{profile.bio}</p>}
         </div>
