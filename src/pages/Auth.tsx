@@ -57,8 +57,8 @@ export default function Auth() {
       if (data) {
         // Sort to match UNI_ORDER
         const sorted = [...(data as University[])].sort((a, b) => {
-          const ai = UNI_ORDER.indexOf(a.short_name || "");
-          const bi = UNI_ORDER.indexOf(b.short_name || "");
+          const ai = UNI_ORDER.indexOf(a.short_name as any);
+          const bi = UNI_ORDER.indexOf(b.short_name as any);
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
         });
         setUniversities(sorted);
