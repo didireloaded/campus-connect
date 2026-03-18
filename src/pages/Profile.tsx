@@ -5,6 +5,7 @@ import { profileService } from "@/services/profileService";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, LogOut, Grid3X3, Loader2, MapPin, Camera, X, Check, CalendarDays, ShoppingBag, FileText, Bookmark } from "lucide-react";
+import { getUniConfig } from "@/config/universities";
 import { PostCard } from "@/components/feed/PostCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
