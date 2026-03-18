@@ -47,13 +47,26 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        feature: {
+          marketplace: "hsl(var(--feature-marketplace))",
+          studygroups: "hsl(var(--feature-studygroups))",
+          confessions: "hsl(var(--feature-confessions))",
+          spotted: "hsl(var(--feature-spotted))",
+          jobs: "hsl(var(--feature-jobs))",
+          rides: "hsl(var(--feature-rides))",
+          notes: "hsl(var(--feature-notes))",
+          polls: "hsl(var(--feature-polls))",
+          lostfound: "hsl(var(--feature-lostfound))",
+          clubs: "hsl(var(--feature-clubs))",
+          wall: "hsl(var(--feature-wall))",
+          map: "hsl(var(--feature-map))",
+        },
         campus: {
           blue: "hsl(var(--campus-blue))",
           "blue-light": "hsl(var(--campus-blue-light))",
           orange: "hsl(var(--campus-orange))",
           green: "hsl(var(--campus-green))",
           purple: "hsl(var(--campus-purple))",
-          ghost: "hsl(var(--campus-ghost))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -81,7 +94,7 @@ export default {
           to: { height: "0" },
         },
         "fade-in": {
-          from: { opacity: "0", transform: "translateY(8px)" },
+          from: { opacity: "0", transform: "translateY(6px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "slide-up": {
@@ -92,8 +105,8 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "slide-up": "slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "fade-in": "fade-in 0.25s ease-out",
+        "slide-up": "slide-up 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
       },
     },
   },
