@@ -146,6 +146,7 @@ export default function Profile() {
   const [posts, setPosts] = useState<PostWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [universityName, setUniversityName] = useState("");
+  const [uniShortName, setUniShortName] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
   const [attendedEvents, setAttendedEvents] = useState<any[]>([]);
