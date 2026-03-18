@@ -3,8 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { postService } from "@/services/postService";
 import { notificationService } from "@/services/notificationService";
 import {
-  Heart, MessageCircle, Share2, MoreHorizontal,
-  Send, X, Trash2, Flag, Copy, CheckCheck, Loader2
+  MessageCircle, Share2, MoreHorizontal,
+  Send, X, Trash2, Flag, Bookmark, CheckCheck, Loader2
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
@@ -83,7 +83,7 @@ function CommentSheet({
       onCommentPosted();
       setTimeout(() => listRef.current?.scrollTo({ top: 99999, behavior: "smooth" }), 50);
     } catch {
-      toast.error("Failed to post comment");
+      toast.error("Failed to post reply");
     } finally {
       setPosting(false);
     }
@@ -93,60 +93,46 @@ function CommentSheet({
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-            onClick={onClose}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm" onClick={onClose}
           />
-          {/* Sheet */}
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-3xl max-h-[80vh] flex flex-col shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl max-h-[80vh] flex flex-col shadow-modal border-t border-border"
           >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1 shrink-0">
-              <div className="w-10 h-1 bg-border rounded-full" />
+            <div className="flex justify-center pt-2.5 pb-1 shrink-0">
+              <div className="w-8 h-0.5 bg-border rounded-full" />
             </div>
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 pb-3 border-b border-border shrink-0">
-              <h3 className="font-bold text-foreground">
-                {commentsCount} {commentsCount === 1 ? "Comment" : "Comments"}
+            <div className="flex items-center justify-between px-4 pb-2.5 border-b border-border shrink-0">
+              <h3 className="text-sm font-semibold text-foreground">
+                {commentsCount} {commentsCount === 1 ? "Reply" : "Replies"}
               </h3>
-              <button onClick={onClose} className="text-muted-foreground p-1">
-                <X size={18} />
-              </button>
+              <button onClick={onClose} className="text-muted-foreground p-1"><X size={16} /></button>
             </div>
-            {/* Comment list */}
-            <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+            <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3.5">
               {loading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="animate-spin text-primary" size={22} />
+                  <Loader2 className="animate-spin text-muted-foreground" size={20} />
                 </div>
               ) : comments.length === 0 ? (
-                <p className="text-center text-sm text-muted-foreground py-8">
-                  No comments yet. Be the first!
-                </p>
+                <p className="text-center text-xs text-muted-foreground py-8">No replies yet. Start the conversation.</p>
               ) : (
                 comments.map((c) => (
-                  <div key={c.id} className="flex gap-3">
-                    <Avatar className="h-8 w-8 shrink-0">
+                  <div key={c.id} className="flex gap-2.5">
+                    <Avatar className="h-7 w-7 shrink-0">
                       <AvatarImage src={c.profiles?.avatar_url || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      <AvatarFallback className="bg-secondary text-secondary-foreground text-[10px] font-semibold">
                         {c.profiles?.username?.[0]?.toUpperCase() || "?"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-foreground">
-                        <span className="font-semibold mr-1.5">{c.profiles?.username}</span>
+                      <p className="text-xs text-foreground">
+                        <span className="font-semibold mr-1">{c.profiles?.username}</span>
                         {c.content}
                       </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                      <p className="text-[9px] text-muted-foreground mt-0.5">
                         {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
                       </p>
                     </div>
@@ -154,8 +140,7 @@ function CommentSheet({
                 ))
               )}
             </div>
-            {/* Input */}
-            <div className="flex items-end gap-3 px-4 py-3 border-t border-border shrink-0 pb-safe">
+            <div className="flex items-end gap-2.5 px-4 py-2.5 border-t border-border shrink-0 pb-safe">
               <textarea
                 ref={inputRef}
                 value={text}
@@ -163,17 +148,17 @@ function CommentSheet({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handlePost(); }
                 }}
-                placeholder="Add a comment…"
+                placeholder="Write a reply…"
                 rows={1}
-                className="flex-1 bg-secondary rounded-2xl px-4 py-2.5 text-[13px] text-foreground placeholder:text-muted-foreground resize-none outline-none focus:ring-1 focus:ring-primary/30"
-                style={{ minHeight: 40, maxHeight: 120 }}
+                className="flex-1 bg-secondary rounded-xl px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground resize-none outline-none focus:ring-1 focus:ring-ring/30"
+                style={{ minHeight: 36, maxHeight: 100 }}
               />
               <button
                 onClick={handlePost}
                 disabled={!text.trim() || posting}
-                className="w-9 h-9 rounded-full bg-primary flex items-center justify-center disabled:opacity-40 transition-opacity shrink-0"
+                className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center disabled:opacity-40 transition-opacity shrink-0"
               >
-                {posting ? <Loader2 size={15} className="animate-spin text-primary-foreground" /> : <Send size={15} className="text-primary-foreground" />}
+                {posting ? <Loader2 size={13} className="animate-spin text-primary-foreground" /> : <Send size={13} className="text-primary-foreground" />}
               </button>
             </div>
           </motion.div>
@@ -186,51 +171,36 @@ function CommentSheet({
 // ─── More Menu ────────────────────────────────────────────────────────────────
 
 function MoreMenu({
-  open,
-  onClose,
-  isOwn,
-  onDelete,
-  onReport,
+  open, onClose, isOwn, onDelete, onReport,
 }: {
-  open: boolean;
-  onClose: () => void;
-  isOwn: boolean;
-  onDelete: () => void;
-  onReport: () => void;
+  open: boolean; onClose: () => void; isOwn: boolean; onDelete: () => void; onReport: () => void;
 }) {
   return (
     <AnimatePresence>
       {open && (
         <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40" onClick={onClose} />
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: -4 }}
+            initial={{ opacity: 0, scale: 0.95, y: -2 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className="absolute right-3 top-10 z-50 bg-card border border-border rounded-2xl shadow-xl overflow-hidden min-w-[160px]"
+            exit={{ opacity: 0, scale: 0.95, y: -2 }}
+            transition={{ duration: 0.1 }}
+            className="absolute right-3 top-10 z-50 bg-card border border-border rounded-xl shadow-elevated overflow-hidden min-w-[140px]"
           >
             {isOwn ? (
               <button
                 onClick={() => { onDelete(); onClose(); }}
-                className="flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-destructive/10 w-full transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-destructive hover:bg-destructive/10 w-full transition-colors"
               >
-                <Trash2 size={15} />
-                Delete post
+                <Trash2 size={13} /> Delete
               </button>
             ) : (
               <button
                 onClick={() => { onReport(); onClose(); }}
-                className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent w-full transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-foreground hover:bg-accent w-full transition-colors"
               >
-                <Flag size={15} />
-                Report post
+                <Flag size={13} /> Report
               </button>
             )}
           </motion.div>
@@ -251,6 +221,7 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
   const [showMore, setShowMore] = useState(false);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [saved, setSaved] = useState(false);
   const isOwn = !!user && user.id === post.user_id;
 
   useEffect(() => {
@@ -261,7 +232,6 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
   const handleLike = async () => {
     if (!user) return;
     const wasLiked = liked;
-    // Optimistic
     setLiked(!wasLiked);
     setLikesCount((c) => wasLiked ? Math.max(0, c - 1) : c + 1);
     try {
@@ -271,15 +241,11 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
         await postService.likePost(post.id, user.id);
         if (post.user_id && post.user_id !== user.id) {
           notificationService.createNotification({
-            userId: post.user_id,
-            actorId: user.id,
-            type: "like",
-            referenceId: post.id,
+            userId: post.user_id, actorId: user.id, type: "like", referenceId: post.id,
           }).catch(() => {});
         }
       }
     } catch {
-      // Rollback on failure
       setLiked(wasLiked);
       setLikesCount((c) => wasLiked ? c + 1 : Math.max(0, c - 1));
       toast.error("Failed");
@@ -293,7 +259,7 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
       toast.success("Post deleted");
       onUpdate?.();
     } catch {
-      toast.error("Failed to delete post");
+      toast.error("Failed to delete");
     }
   };
 
@@ -301,11 +267,8 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
     if (!user) return;
     try {
       await supabase.from("reports").insert({
-        reporter_id: user.id,
-        content_type: "post",
-        content_id: post.id,
-        reason: "Inappropriate content",
-        status: "pending",
+        reporter_id: user.id, content_type: "post", content_id: post.id,
+        reason: "Inappropriate content", status: "pending",
       } as any);
       toast.success("Reported — we'll review it");
     } catch {
@@ -316,14 +279,11 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
   const handleShare = async () => {
     const url = `${window.location.origin}/?post=${post.id}`;
     if (navigator.share) {
-      try {
-        await navigator.share({ title: "Campus post", url });
-        return;
-      } catch {}
+      try { await navigator.share({ title: "Campus post", url }); return; } catch {}
     }
     await navigator.clipboard.writeText(url);
     setCopied(true);
-    toast.success("Link copied to clipboard");
+    toast.success("Link copied");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -338,119 +298,81 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
 
   return (
     <>
-      <motion.article
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card relative rounded-2xl border border-border/50 shadow-card overflow-hidden"
-      >
+      <article className="bg-card relative rounded-xl border border-border shadow-card overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3">
-          <Avatar className="h-9 w-9">
+        <div className="flex items-center gap-2.5 px-3.5 py-3">
+          <Avatar className="h-8 w-8">
             <AvatarImage src={post.profiles?.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-secondary text-secondary-foreground text-[10px] font-semibold">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-foreground truncate">{post.profiles?.username}</p>
+            <p className="text-xs font-semibold text-foreground truncate">{post.profiles?.full_name || post.profiles?.username}</p>
             <p className="text-[10px] text-muted-foreground">
               {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
             </p>
           </div>
           <div className="relative">
-            <button
-              onClick={() => setShowMore((v) => !v)}
-              className="text-muted-foreground p-1 hover:text-foreground transition-colors"
-            >
-              <MoreHorizontal size={18} />
+            <button onClick={() => setShowMore((v) => !v)} className="text-muted-foreground p-1 hover:text-foreground transition-colors">
+              <MoreHorizontal size={16} />
             </button>
-            <MoreMenu
-              open={showMore}
-              onClose={() => setShowMore(false)}
-              isOwn={isOwn}
-              onDelete={handleDelete}
-              onReport={handleReport}
-            />
+            <MoreMenu open={showMore} onClose={() => setShowMore(false)} isOwn={isOwn} onDelete={handleDelete} onReport={handleReport} />
           </div>
         </div>
-
-        {/* Image */}
-        {post.image_url && (
-          <div className="bg-muted aspect-square">
-            <img src={post.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="px-4 py-2 flex items-center gap-4">
-          <button onClick={handleLike} className="group">
-            <Heart
-              size={24}
-              className={`transition-all duration-150 ${
-                liked
-                  ? "fill-destructive text-destructive scale-110"
-                  : "text-foreground group-hover:text-muted-foreground"
-              }`}
-            />
-          </button>
-          <button onClick={() => setShowComments(true)} className="group">
-            <MessageCircle size={24} className="text-foreground group-hover:text-muted-foreground transition-colors" />
-          </button>
-          <button onClick={handleShare} className="group ml-auto">
-            {copied
-              ? <CheckCheck size={22} className="text-primary" />
-              : <Share2 size={22} className="text-foreground group-hover:text-muted-foreground transition-colors" />
-            }
-          </button>
-        </div>
-
-        {/* Likes */}
-        {likesCount > 0 && (
-          <p className="px-4 text-[13px] font-semibold text-foreground">
-            {likesCount} {likesCount === 1 ? "like" : "likes"}
-          </p>
-        )}
 
         {/* Content */}
         {post.content && (
-          <div className="px-4 pb-1">
-            <p className="text-[13px] text-foreground">
-              <span className="font-semibold mr-1.5">{post.profiles?.username}</span>
+          <div className="px-3.5 pb-2">
+            <p className="text-[13px] text-foreground leading-relaxed">
               {displayContent}
               {contentTooLong && !expanded && (
-                <button
-                  onClick={() => setExpanded(true)}
-                  className="text-muted-foreground ml-1 font-medium"
-                >
-                  more
-                </button>
+                <button onClick={() => setExpanded(true)} className="text-primary ml-1 font-medium text-xs">more</button>
               )}
             </p>
           </div>
         )}
 
-        {/* Comments trigger */}
-        {commentsCount > 0 && (
-          <button onClick={() => setShowComments(true)} className="px-4 pb-1">
-            <p className="text-[13px] text-muted-foreground">
-              View all {commentsCount} comments
-            </p>
-          </button>
+        {/* Image */}
+        {post.image_url && (
+          <div className="mx-3.5 mb-2.5 rounded-lg overflow-hidden bg-secondary">
+            <img src={post.image_url} alt="" className="w-full object-cover" style={{ maxHeight: 320 }} loading="lazy" />
+          </div>
         )}
 
-        <p className="px-4 pb-3 text-[10px] text-muted-foreground uppercase tracking-wide sr-only">
-          {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-        </p>
-      </motion.article>
+        {/* Participation Actions */}
+        <div className="px-3.5 py-2 border-t border-border flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowComments(true)} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              <MessageCircle size={16} />
+              <span className="text-[11px] font-medium">{commentsCount > 0 ? `${commentsCount} replies` : "Reply"}</span>
+            </button>
+            <button onClick={handleLike} className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
+              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md transition-colors ${
+                liked ? "bg-primary/10 text-primary" : ""
+              }`}>
+                {liked ? "Interested" : "Interested"} {likesCount > 0 ? `· ${likesCount}` : ""}
+              </span>
+            </button>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => { setSaved(!saved); toast.success(saved ? "Removed" : "Saved"); }}
+              className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Bookmark size={15} className={saved ? "fill-foreground text-foreground" : ""} />
+            </button>
+            <button onClick={handleShare} className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              {copied ? <CheckCheck size={15} className="text-primary" /> : <Share2 size={15} />}
+            </button>
+          </div>
+        </div>
+      </article>
 
-      {/* Comments Sheet */}
       <CommentSheet
         postId={post.id}
         open={showComments}
         onClose={() => setShowComments(false)}
         commentsCount={commentsCount}
-        onCommentPosted={() => {
-          setCommentsCount((c) => c + 1);
-          onUpdate?.();
-        }}
+        onCommentPosted={() => { setCommentsCount((c) => c + 1); onUpdate?.(); }}
       />
     </>
   );
