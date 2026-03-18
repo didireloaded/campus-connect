@@ -7,10 +7,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, Camera, Loader2, GraduationCap } from "lucide-react";
 
-import unamLogo from "@/assets/unam-logo.png";
-import nustLogo from "@/assets/nust-logo.png";
-import iumLogo from "@/assets/ium-logo.png";
-import welwitchiaLogo from "@/assets/welwitchia-logo.png";
+import { getUniConfig, UNI_ORDER } from "@/config/universities";
 
 type AuthStep = "choose-university" | "signup" | "login";
 
@@ -20,35 +17,17 @@ interface University {
   short_name: string | null;
 }
 
-const UNI_LOGOS: Record<string, string> = {
-  UNAM: unamLogo,
-  NUST: nustLogo,
-  IUM: iumLogo,
-  Welwitchia: welwitchiaLogo,
-};
-
-const UNI_COLORS: Record<string, { bg: string; border: string; glow: string }> = {
-  UNAM: { bg: "bg-blue-50", border: "border-blue-300", glow: "shadow-[0_0_20px_-4px_hsl(221_83%_53%/0.3)]" },
-  NUST: { bg: "bg-orange-50", border: "border-orange-300", glow: "shadow-[0_0_20px_-4px_hsl(25_95%_53%/0.3)]" },
-  IUM: { bg: "bg-emerald-50", border: "border-emerald-300", glow: "shadow-[0_0_20px_-4px_hsl(142_76%_36%/0.3)]" },
-  Welwitchia: { bg: "bg-purple-50", border: "border-purple-300", glow: "shadow-[0_0_20px_-4px_hsl(262_83%_58%/0.3)]" },
-};
-
 function getLogoForUni(uni: University): string {
-  if (uni.short_name && UNI_LOGOS[uni.short_name]) return UNI_LOGOS[uni.short_name];
-  for (const key of Object.keys(UNI_LOGOS)) {
-    if (uni.name.toLowerCase().includes(key.toLowerCase())) return UNI_LOGOS[key];
-  }
-  return unamLogo;
+  const cfg = getUniConfig(uni.short_name);
+  return cfg.logo;
 }
 
 function getColorsForUni(uni: University) {
-  const key = uni.short_name || "";
-  return UNI_COLORS[key] || UNI_COLORS.UNAM;
+  const cfg = getUniConfig(uni.short_name);
+  return cfg.colors;
 }
 
-// Fixed 2x2 grid order
-const UNI_ORDER = ["UNAM", "NUST", "IUM", "Welwitchia"];
+// UNI_ORDER imported from config
 
 export default function Auth() {
   const { session } = useAuth();
@@ -78,8 +57,8 @@ export default function Auth() {
       if (data) {
         // Sort to match UNI_ORDER
         const sorted = [...(data as University[])].sort((a, b) => {
-          const ai = UNI_ORDER.indexOf(a.short_name || "");
-          const bi = UNI_ORDER.indexOf(b.short_name || "");
+          const ai = UNI_ORDER.indexOf(a.short_name as any);
+          const bi = UNI_ORDER.indexOf(b.short_name as any);
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
         });
         setUniversities(sorted);

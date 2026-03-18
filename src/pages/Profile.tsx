@@ -5,6 +5,7 @@ import { profileService } from "@/services/profileService";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, LogOut, Grid3X3, Loader2, MapPin, Camera, X, Check, CalendarDays, ShoppingBag, FileText, Bookmark } from "lucide-react";
+import { getUniConfig } from "@/config/universities";
 import { PostCard } from "@/components/feed/PostCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -145,6 +146,7 @@ export default function Profile() {
   const [posts, setPosts] = useState<PostWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [universityName, setUniversityName] = useState("");
+  const [uniShortName, setUniShortName] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
   const [attendedEvents, setAttendedEvents] = useState<any[]>([]);
@@ -199,7 +201,9 @@ export default function Profile() {
     loadPosts();
     if (profile?.university_id) {
       profileService.getUniversity(profile.university_id).then((uni) => {
-        setUniversityName((uni as any).short_name || (uni as any).name);
+        const sn = (uni as any).short_name || null;
+        setUniShortName(sn);
+        setUniversityName(sn || (uni as any).name);
       }).catch(() => {});
     }
   }, [user, profile]);
@@ -248,9 +252,10 @@ export default function Profile() {
           <h1 className="text-xl font-extrabold text-foreground mt-3">{profile?.full_name || profile?.username}</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">@{profile?.username}</p>
           {universityName && (
-            <p className="text-[12px] text-primary font-semibold mt-2 flex items-center justify-center gap-1">
-              <MapPin size={12} /> {universityName}
-            </p>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <img src={getUniConfig(uniShortName).logo} alt={universityName} className="w-5 h-5 object-contain" />
+              <p className="text-[12px] text-primary font-semibold">{universityName}</p>
+            </div>
           )}
           {profile?.bio && <p className="text-[13px] text-foreground mt-2 px-6 leading-relaxed">{profile.bio}</p>}
         </div>

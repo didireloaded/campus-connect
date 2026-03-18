@@ -98,6 +98,13 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed";
       nameKey?: string;
       labelKey?: string;
+      active?: boolean;
+      payload?: any[];
+      label?: string;
+      labelFormatter?: (value: any, payload: any[]) => React.ReactNode;
+      formatter?: (value: any, name: string, item: any, index: number, payload: any[]) => React.ReactNode;
+      color?: string;
+      labelClassName?: string;
     }
 >(
   (
@@ -229,8 +236,9 @@ const ChartLegend = RechartsPrimitive.Legend;
 
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+  React.ComponentProps<"div"> & {
+      payload?: any[];
+      verticalAlign?: "top" | "bottom";
       hideIcon?: boolean;
       nameKey?: string;
     }
