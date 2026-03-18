@@ -201,7 +201,9 @@ export default function Profile() {
     loadPosts();
     if (profile?.university_id) {
       profileService.getUniversity(profile.university_id).then((uni) => {
-        setUniversityName((uni as any).short_name || (uni as any).name);
+        const sn = (uni as any).short_name || null;
+        setUniShortName(sn);
+        setUniversityName(sn || (uni as any).name);
       }).catch(() => {});
     }
   }, [user, profile]);
