@@ -7,7 +7,15 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, Camera, Loader2, GraduationCap } from "lucide-react";
 
-import { universities, getUniConfig, UNI_ORDER } from "@/config/universities";
+import { getUniConfig, UNI_ORDER } from "@/config/universities";
+
+type AuthStep = "choose-university" | "signup" | "login";
+
+interface University {
+  id: string;
+  name: string;
+  short_name: string | null;
+}
 
 function getLogoForUni(uni: University): string {
   const cfg = getUniConfig(uni.short_name);
