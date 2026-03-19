@@ -238,58 +238,68 @@ export default function Profile() {
       </header>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-5">
-        <div className="text-center">
-          <div className="relative inline-block">
-            <Avatar className="h-24 w-24 ring-[3px] ring-primary">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">{initials}</AvatarFallback>
-            </Avatar>
-            <button onClick={() => setEditOpen(true)}
-              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-glow">
-              <Camera size={14} className="text-primary-foreground" />
-            </button>
-          </div>
-          <h1 className="text-xl font-extrabold text-foreground mt-3">{profile?.full_name || profile?.username}</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">@{profile?.username}</p>
-          {universityName && (
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <img src={getUniConfig(uniShortName).logo} alt={universityName} className="w-5 h-5 object-contain" />
-              <p className="text-[12px] text-primary font-semibold">{universityName}</p>
+        {/* Profile card */}
+        <div className="bg-card rounded-2xl border border-border p-5 shadow-card">
+          <div className="flex items-start gap-4">
+            <div className="relative">
+              <Avatar className="h-20 w-20 ring-2 ring-border">
+                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarFallback className="bg-secondary text-foreground text-xl font-bold">{initials}</AvatarFallback>
+              </Avatar>
+              <button onClick={() => setEditOpen(true)}
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center border-2 border-card shadow-sm">
+                <Camera size={12} className="text-primary-foreground" />
+              </button>
             </div>
-          )}
-          {profile?.bio && <p className="text-[13px] text-foreground mt-2 px-6 leading-relaxed">{profile.bio}</p>}
-        </div>
+            <div className="flex-1 min-w-0 pt-1">
+              <h1 className="text-lg font-bold text-foreground truncate">{profile?.full_name || profile?.username}</h1>
+              <p className="text-xs text-muted-foreground">@{profile?.username}</p>
+              {universityName && (
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <img src={getUniConfig(uniShortName).logo} alt={universityName} className="w-4 h-4 object-contain" />
+                  <p className="text-[11px] text-primary font-medium">{universityName}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          {profile?.bio && <p className="text-[13px] text-muted-foreground mt-3 leading-relaxed">{profile.bio}</p>}
 
-        <div className="flex justify-center gap-10 mt-5">
-          <div className="text-center">
-            <p className="text-lg font-extrabold text-foreground">{posts.length}</p>
-            <p className="text-[11px] text-muted-foreground font-medium">Posts</p>
+          {/* Participation stats */}
+          <div className="grid grid-cols-4 gap-2 mt-4">
+            <div className="bg-secondary rounded-xl py-2.5 text-center">
+              <p className="text-base font-bold text-foreground">{posts.length}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">Posts</p>
+            </div>
+            <div className="bg-secondary rounded-xl py-2.5 text-center">
+              <p className="text-base font-bold text-foreground">{attendedEvents.length}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">Events</p>
+            </div>
+            <div className="bg-secondary rounded-xl py-2.5 text-center">
+              <p className="text-base font-bold text-foreground">{listings.length}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">Listings</p>
+            </div>
+            <div className="bg-secondary rounded-xl py-2.5 text-center">
+              <p className="text-base font-bold text-foreground">{notes.length}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">Notes</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-lg font-extrabold text-foreground">{profile?.followers_count || 0}</p>
-            <p className="text-[11px] text-muted-foreground font-medium">Followers</p>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-extrabold text-foreground">{profile?.following_count || 0}</p>
-            <p className="text-[11px] text-muted-foreground font-medium">Following</p>
-          </div>
-        </div>
 
-        <button onClick={() => setEditOpen(true)}
-          className="w-full mt-5 py-2 rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground hover:bg-accent transition-colors">
-          Edit Profile
-        </button>
+          <button onClick={() => setEditOpen(true)}
+            className="w-full mt-4 py-2.5 rounded-xl bg-secondary text-sm font-semibold text-foreground hover:bg-accent transition-colors border border-border">
+            Edit Profile
+          </button>
+        </div>
       </motion.div>
 
-      {/* Segmented tabs - scrollable for 5 tabs */}
-      <div className="mx-5 mb-4 bg-secondary rounded-2xl p-1 flex h-11 overflow-x-auto scrollbar-hide">
+      {/* Segmented tabs */}
+      <div className="mx-5 mb-4 bg-secondary rounded-xl p-1 flex h-10 overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 min-w-0 flex items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition-all whitespace-nowrap px-2 ${
+            className={`flex-1 min-w-0 flex items-center justify-center gap-1 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap px-2 ${
               activeTab === tab.key
-                ? "bg-primary text-primary-foreground shadow-glow"
+                ? "bg-card text-foreground shadow-sm border border-border"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
