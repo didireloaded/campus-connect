@@ -116,11 +116,6 @@ export default function Marketplace() {
                 {/* Product info */}
                 <div className="p-2.5">
                   <p className="text-xs font-semibold text-foreground line-clamp-2 leading-tight">{listing.title}</p>
-                  {listing.condition && (
-                    <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-secondary text-muted-foreground">
-                      {listing.condition}
-                    </span>
-                  )}
                   <div className="flex items-center gap-1.5 mt-2">
                     <Avatar className="h-4 w-4">
                       <AvatarImage src={listing.profiles?.avatar_url || undefined} />
