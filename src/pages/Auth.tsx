@@ -164,14 +164,13 @@ export default function Auth() {
             transition={{ duration: 0.35 }}
             className="flex-1 flex flex-col px-5 pt-14 pb-6"
           >
-            {/* App brand */}
             <div className="text-center">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 18 }}
               >
-                <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
                   Camp<span className="text-primary">Life</span>
                 </h1>
               </motion.div>
@@ -179,70 +178,50 @@ export default function Auth() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="text-[15px] text-muted-foreground mt-2 font-medium"
+                className="text-sm text-muted-foreground mt-1.5"
               >
-                Your campus. Your community.
+                Your campus workspace
               </motion.p>
             </div>
 
-            {/* Title */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.25 }}
-              className="mt-10 mb-5"
+              className="mt-8 mb-4"
             >
-              <h2 className="text-xl font-bold text-foreground text-center">Choose Your University</h2>
+              <h2 className="text-base font-semibold text-foreground text-center">Select your university</h2>
             </motion.div>
 
-            {/* 2x2 Grid */}
             <div className="grid grid-cols-2 gap-3 flex-1">
               {universities.map((uni, i) => {
-                const colors = getColorsForUni(uni);
                 const isSelected = tappedId === uni.id;
                 return (
                   <motion.button
                     key={uni.id}
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{
-                      opacity: 1,
-                      scale: isSelected ? 1.05 : 1,
-                    }}
-                    transition={{
-                      delay: 0.3 + i * 0.08,
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 20,
-                    }}
-                    whileTap={{ scale: 1.05 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + i * 0.06 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => handleSelectUni(uni)}
-                    className={`flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-200 ${
+                    className={`flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border transition-all duration-200 ${
                       isSelected
-                        ? `${colors.border} ${colors.bg} ${colors.glow}`
-                        : "border-border bg-card hover:shadow-card"
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card hover:border-primary/30 hover:shadow-sm"
                     }`}
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-background flex items-center justify-center overflow-hidden shadow-sm">
-                      <img
-                        src={getLogoForUni(uni)}
-                        alt={uni.name}
-                        className="w-14 h-14 object-contain"
-                      />
+                    <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center overflow-hidden">
+                      <img src={getLogoForUni(uni)} alt={uni.name} className="w-12 h-12 object-contain" />
                     </div>
                     <div className="text-center">
-                      <p className="text-[13px] font-bold text-foreground leading-tight">
-                        {uni.short_name || uni.name}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight line-clamp-2">
-                        {uni.name}
-                      </p>
+                      <p className="text-sm font-semibold text-foreground">{uni.short_name || uni.name}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight line-clamp-2">{uni.name}</p>
                     </div>
                   </motion.button>
                 );
               })}
             </div>
 
-            {/* Footer note */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -255,9 +234,7 @@ export default function Auth() {
               </div>
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <button onClick={() => setStep("login")} className="text-primary font-semibold">
-                  Sign In
-                </button>
+                <button onClick={() => setStep("login")} className="text-primary font-semibold">Sign In</button>
               </p>
             </motion.div>
           </motion.div>
@@ -275,48 +252,45 @@ export default function Auth() {
           >
             <button
               onClick={() => { setStep("choose-university"); setTappedId(null); setSelectedUni(null); }}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3 self-start"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 self-start"
             >
               <ArrowLeft size={16} /> Back
             </button>
 
-            {/* University badge */}
             {selectedUni && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-center gap-2.5 mb-4"
+                className="flex items-center justify-center gap-2.5 mb-5 bg-card rounded-xl p-3 border border-border"
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${getColorsForUni(selectedUni).bg}`}>
-                  <img src={getLogoForUni(selectedUni)} alt="" className="w-8 h-8 object-contain" />
+                <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center overflow-hidden">
+                  <img src={getLogoForUni(selectedUni)} alt="" className="w-7 h-7 object-contain" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">{selectedUni.short_name || selectedUni.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{selectedUni.short_name || selectedUni.name}</p>
                   <p className="text-[10px] text-muted-foreground">Campus Community</p>
                 </div>
               </motion.div>
             )}
 
-            <h2 className="text-xl font-bold text-foreground text-center mb-5">Create Your Account</h2>
+            <h2 className="text-lg font-bold text-foreground text-center mb-5">Create your account</h2>
 
-            {/* Avatar */}
             <div className="flex justify-center mb-5">
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => fileRef.current?.click()}
-                className="relative w-22 h-22 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-dashed border-border hover:border-primary/50 transition-colors"
-                style={{ width: 88, height: 88 }}
+                className="relative w-20 h-20 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-dashed border-border hover:border-primary/40 transition-colors"
               >
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="flex flex-col items-center gap-1">
-                    <Camera size={22} className="text-muted-foreground" />
-                    <span className="text-[9px] text-muted-foreground font-medium">Add photo</span>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <Camera size={20} className="text-muted-foreground" />
+                    <span className="text-[9px] text-muted-foreground font-medium">Photo</span>
                   </div>
                 )}
-                <div className="absolute bottom-0 right-0 w-7 h-7 bg-primary rounded-full flex items-center justify-center border-2 border-background">
-                  <Camera size={11} className="text-primary-foreground" />
+                <div className="absolute bottom-0 right-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-background">
+                  <Camera size={10} className="text-primary-foreground" />
                 </div>
               </motion.button>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
@@ -324,18 +298,18 @@ export default function Auth() {
 
             <div className="space-y-3 flex-1">
               <div className="flex gap-3">
-                <Input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="text-foreground h-12" />
-                <Input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="text-foreground h-12" />
+                <Input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="text-foreground h-11 rounded-xl bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-ring" />
+                <Input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="text-foreground h-11 rounded-xl bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-ring" />
               </div>
-              <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} className="text-foreground h-12" />
-              <Input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="text-foreground h-12" />
+              <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} className="text-foreground h-11 rounded-xl bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-ring" />
+              <Input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="text-foreground h-11 rounded-xl bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-ring" />
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password (min 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="text-foreground pr-10 h-12"
+                  className="text-foreground pr-10 h-11 rounded-xl bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-ring"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -347,9 +321,9 @@ export default function Auth() {
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSignup}
                 disabled={loading}
-                className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-[15px] disabled:opacity-50 mt-1 flex items-center justify-center gap-2 shadow-elevated"
+                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
               >
-                {loading ? <><Loader2 className="animate-spin" size={18} /> Creating...</> : "Create Account"}
+                {loading ? <><Loader2 className="animate-spin" size={16} /> Creating...</> : "Create Account"}
               </motion.button>
             </div>
 
@@ -371,22 +345,22 @@ export default function Auth() {
             className="flex-1 flex flex-col items-center justify-center px-5 pb-8"
           >
             <div className="w-full max-w-sm">
-              <div className="text-center mb-10">
-                <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
                   Camp<span className="text-primary">Life</span>
                 </h1>
-                <p className="text-[15px] text-muted-foreground mt-2 font-medium">Welcome back</p>
+                <p className="text-sm text-muted-foreground mt-1.5">Welcome back</p>
               </div>
 
               <div className="space-y-3">
-                <Input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="text-foreground h-12" />
+                <Input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className="text-foreground h-11 rounded-xl bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-ring" />
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="text-foreground pr-10 h-12"
+                    className="text-foreground pr-10 h-11 rounded-xl bg-secondary border-0 focus-visible:ring-1 focus-visible:ring-ring"
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -398,17 +372,15 @@ export default function Auth() {
                   whileTap={{ scale: 0.97 }}
                   onClick={handleLogin}
                   disabled={loading}
-                  className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-[15px] disabled:opacity-50 flex items-center justify-center gap-2 shadow-elevated"
+                  className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {loading ? <><Loader2 className="animate-spin" size={18} /> Signing in...</> : "Sign In"}
+                  {loading ? <><Loader2 className="animate-spin" size={16} /> Signing in...</> : "Sign In"}
                 </motion.button>
               </div>
 
               <p className="text-center text-sm text-muted-foreground mt-6">
                 Don't have an account?{" "}
-                <button onClick={() => setStep("choose-university")} className="text-primary font-semibold">
-                  Sign Up
-                </button>
+                <button onClick={() => setStep("choose-university")} className="text-primary font-semibold">Sign Up</button>
               </p>
             </div>
           </motion.div>
