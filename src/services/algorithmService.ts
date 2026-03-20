@@ -5,14 +5,13 @@
 
 export interface ScoredContent {
   created_at: string;
-  likes_count?: number;
-  comments_count?: number;
-  joins_count?: number;
-  views_count?: number;
+  likes_count?: number | null;
+  comments_count?: number | null;
+  joins_count?: number | null;
+  views_count?: number | null;
   content_type?: ContentType;
-  event_date?: string;
-  expires_at?: string;
-  [key: string]: unknown;
+  event_date?: string | null;
+  expires_at?: string | null;
 }
 
 export type ContentType =
