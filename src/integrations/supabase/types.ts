@@ -14,6 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
+      campus_alerts: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          posted_by: string | null
+          resolved_at: string | null
+          severity: string | null
+          title: string
+          university_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          posted_by?: string | null
+          resolved_at?: string | null
+          severity?: string | null
+          title: string
+          university_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          posted_by?: string | null
+          resolved_at?: string | null
+          severity?: string | null
+          title?: string
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_alerts_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campus_alerts_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campus_updates: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          inserted_at: string | null
+          source: string | null
+          source_type: string | null
+          source_url: string | null
+          title: string
+          university_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          inserted_at?: string | null
+          source?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          title: string
+          university_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          inserted_at?: string | null
+          source?: string | null
+          source_type?: string | null
+          source_url?: string | null
+          title?: string
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_updates_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_members: {
         Row: {
           club_id: string
@@ -95,6 +190,7 @@ export type Database = {
           content: string
           created_at: string | null
           id: string
+          parent_comment_id: string | null
           post_id: string
           user_id: string
         }
@@ -102,6 +198,7 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          parent_comment_id?: string | null
           post_id: string
           user_id: string
         }
@@ -109,10 +206,18 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          parent_comment_id?: string | null
           post_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "comments_post_id_fkey"
             columns: ["post_id"]
@@ -139,6 +244,7 @@ export type Database = {
           moderation_status: string | null
           reactions_count: number | null
           university_id: string
+          user_id: string | null
         }
         Insert: {
           alias?: string | null
@@ -149,6 +255,7 @@ export type Database = {
           moderation_status?: string | null
           reactions_count?: number | null
           university_id: string
+          user_id?: string | null
         }
         Update: {
           alias?: string | null
@@ -159,6 +266,7 @@ export type Database = {
           moderation_status?: string | null
           reactions_count?: number | null
           university_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -166,6 +274,129 @@ export type Database = {
             columns: ["university_id"]
             isOneToOne: false
             referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "confessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_aliases: {
+        Row: {
+          alias: string
+          alias_date: string
+          content_type: string
+          user_id: string
+        }
+        Insert: {
+          alias: string
+          alias_date: string
+          content_type: string
+          user_id: string
+        }
+        Update: {
+          alias?: string
+          alias_date?: string
+          content_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_aliases_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_anonymous: boolean | null
+          read: boolean | null
+          sender_alias: string | null
+          sender_id: string
+          thread_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          read?: boolean | null
+          sender_alias?: string | null
+          sender_id: string
+          thread_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          read?: boolean | null
+          sender_alias?: string | null
+          sender_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "dm_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dm_threads: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_id: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_threads_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dm_threads_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -206,6 +437,111 @@ export type Database = {
           },
         ]
       }
+      event_bookmarks: {
+        Row: {
+          event_id: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_bookmarks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_bookmarks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_checkins: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_checkins_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_checkins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           attendees_count: number | null
@@ -213,6 +549,7 @@ export type Database = {
           created_at: string | null
           creator_id: string
           description: string | null
+          end_date: string | null
           event_date: string
           id: string
           location_lat: number | null
@@ -220,6 +557,7 @@ export type Database = {
           location_name: string | null
           title: string
           university_id: string
+          verification_level: string | null
         }
         Insert: {
           attendees_count?: number | null
@@ -227,6 +565,7 @@ export type Database = {
           created_at?: string | null
           creator_id: string
           description?: string | null
+          end_date?: string | null
           event_date: string
           id?: string
           location_lat?: number | null
@@ -234,6 +573,7 @@ export type Database = {
           location_name?: string | null
           title: string
           university_id: string
+          verification_level?: string | null
         }
         Update: {
           attendees_count?: number | null
@@ -241,6 +581,7 @@ export type Database = {
           created_at?: string | null
           creator_id?: string
           description?: string | null
+          end_date?: string | null
           event_date?: string
           id?: string
           location_lat?: number | null
@@ -248,6 +589,7 @@ export type Database = {
           location_name?: string | null
           title?: string
           university_id?: string
+          verification_level?: string | null
         }
         Relationships: [
           {
@@ -265,6 +607,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      feature_flags: {
+        Row: {
+          enabled: boolean | null
+          feature_key: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          enabled?: boolean | null
+          feature_key: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          enabled?: boolean | null
+          feature_key?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       followers: {
         Row: {
@@ -308,6 +671,7 @@ export type Database = {
           contact_info: string | null
           created_at: string | null
           description: string | null
+          expires_at: string | null
           id: string
           job_type: string
           location: string | null
@@ -322,6 +686,7 @@ export type Database = {
           contact_info?: string | null
           created_at?: string | null
           description?: string | null
+          expires_at?: string | null
           id?: string
           job_type?: string
           location?: string | null
@@ -336,6 +701,7 @@ export type Database = {
           contact_info?: string | null
           created_at?: string | null
           description?: string | null
+          expires_at?: string | null
           id?: string
           job_type?: string
           location?: string | null
@@ -351,6 +717,39 @@ export type Database = {
             columns: ["university_id"]
             isOneToOne: false
             referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lecture_note_bookmarks: {
+        Row: {
+          created_at: string | null
+          note_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          note_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          note_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lecture_note_bookmarks_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "lecture_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lecture_note_bookmarks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -386,40 +785,55 @@ export type Database = {
       }
       lecture_notes: {
         Row: {
+          ai_tagged: boolean | null
           course: string | null
+          course_code: string | null
           created_at: string | null
           description: string | null
+          difficulty: string | null
           downloads_count: number | null
           file_type: string | null
           file_url: string
           id: string
+          subject: string | null
           title: string
+          topics: string[] | null
           university_id: string
           upvotes_count: number | null
           user_id: string
         }
         Insert: {
+          ai_tagged?: boolean | null
           course?: string | null
+          course_code?: string | null
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
           downloads_count?: number | null
           file_type?: string | null
           file_url: string
           id?: string
+          subject?: string | null
           title: string
+          topics?: string[] | null
           university_id: string
           upvotes_count?: number | null
           user_id: string
         }
         Update: {
+          ai_tagged?: boolean | null
           course?: string | null
+          course_code?: string | null
           created_at?: string | null
           description?: string | null
+          difficulty?: string | null
           downloads_count?: number | null
           file_type?: string | null
           file_url?: string
           id?: string
+          subject?: string | null
           title?: string
+          topics?: string[] | null
           university_id?: string
           upvotes_count?: number | null
           user_id?: string
@@ -474,10 +888,14 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          has_sensitive: boolean | null
           id: string
           image_url: string | null
+          image_urls: string[] | null
           item_type: string
           location: string | null
+          resolved_at: string | null
+          resolved_by: string | null
           status: string
           title: string
           university_id: string
@@ -486,10 +904,14 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          has_sensitive?: boolean | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           item_type?: string
           location?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           status?: string
           title: string
           university_id: string
@@ -498,16 +920,27 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          has_sensitive?: boolean | null
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           item_type?: string
           location?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           status?: string
           title?: string
           university_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "lost_found_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lost_found_university_id_fkey"
             columns: ["university_id"]
@@ -526,6 +959,7 @@ export type Database = {
           id: string
           image_url: string | null
           image_urls: string[] | null
+          moderation_status: string | null
           payment_methods: string[] | null
           pickup_location: string | null
           price: number
@@ -542,6 +976,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          moderation_status?: string | null
           payment_methods?: string[] | null
           pickup_location?: string | null
           price: number
@@ -558,6 +993,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           image_urls?: string[] | null
+          moderation_status?: string | null
           payment_methods?: string[] | null
           pickup_location?: string | null
           price?: number
@@ -579,6 +1015,58 @@ export type Database = {
             columns: ["university_id"]
             isOneToOne: false
             referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          listing_id: string
+          read: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          listing_id: string
+          read?: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          listing_id?: string
+          read?: boolean | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_messages_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -763,7 +1251,18 @@ export type Database = {
           followers_count: number | null
           following_count: number | null
           full_name: string | null
+          graduation_level: string | null
+          graduation_year: string | null
           id: string
+          last_active_at: string | null
+          last_updates_seen_at: string | null
+          major: string | null
+          peek_university_id: string | null
+          personal_url: string | null
+          reputation_score: number | null
+          shadow_reduced: boolean | null
+          shadow_reduced_at: string | null
+          streak_days: number | null
           university_id: string | null
           updated_at: string | null
           username: string
@@ -776,7 +1275,18 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           full_name?: string | null
+          graduation_level?: string | null
+          graduation_year?: string | null
           id: string
+          last_active_at?: string | null
+          last_updates_seen_at?: string | null
+          major?: string | null
+          peek_university_id?: string | null
+          personal_url?: string | null
+          reputation_score?: number | null
+          shadow_reduced?: boolean | null
+          shadow_reduced_at?: string | null
+          streak_days?: number | null
           university_id?: string | null
           updated_at?: string | null
           username: string
@@ -789,13 +1299,31 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           full_name?: string | null
+          graduation_level?: string | null
+          graduation_year?: string | null
           id?: string
+          last_active_at?: string | null
+          last_updates_seen_at?: string | null
+          major?: string | null
+          peek_university_id?: string | null
+          personal_url?: string | null
+          reputation_score?: number | null
+          shadow_reduced?: boolean | null
+          shadow_reduced_at?: string | null
+          streak_days?: number | null
           university_id?: string | null
           updated_at?: string | null
           username?: string
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_peek_university_id_fkey"
+            columns: ["peek_university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_university_id_fkey"
             columns: ["university_id"]
@@ -914,15 +1442,91 @@ export type Database = {
           },
         ]
       }
+      saved_posts: {
+        Row: {
+          post_id: string
+          post_type: string
+          saved_at: string | null
+          user_id: string
+        }
+        Insert: {
+          post_id: string
+          post_type: string
+          saved_at?: string | null
+          user_id: string
+        }
+        Update: {
+          post_id?: string
+          post_type?: string
+          saved_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spotted_comments: {
+        Row: {
+          alias: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_anonymous: boolean | null
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          alias?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          alias?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotted_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "spotted_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotted_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spotted_posts: {
         Row: {
           alias: string | null
           created_at: string | null
           description: string
+          expires_at: string | null
           id: string
           image_url: string | null
           is_anonymous: boolean | null
           location: string
+          moderation_status: string | null
           spotted_time: string | null
           title: string
           university_id: string
@@ -932,10 +1536,12 @@ export type Database = {
           alias?: string | null
           created_at?: string | null
           description: string
+          expires_at?: string | null
           id?: string
           image_url?: string | null
           is_anonymous?: boolean | null
           location: string
+          moderation_status?: string | null
           spotted_time?: string | null
           title: string
           university_id: string
@@ -945,10 +1551,12 @@ export type Database = {
           alias?: string | null
           created_at?: string | null
           description?: string
+          expires_at?: string | null
           id?: string
           image_url?: string | null
           is_anonymous?: boolean | null
           location?: string
+          moderation_status?: string | null
           spotted_time?: string | null
           title?: string
           university_id?: string
@@ -1089,23 +1697,77 @@ export type Database = {
           },
         ]
       }
+      study_group_files: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          group_id: string
+          id: string
+          uploader_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          group_id: string
+          id?: string
+          uploader_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          group_id?: string
+          id?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_files_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_group_files_uploader_id_fkey"
+            columns: ["uploader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_group_members: {
         Row: {
           group_id: string
           id: string
           joined_at: string | null
+          last_read_at: string | null
+          role: string | null
           user_id: string
         }
         Insert: {
           group_id: string
           id?: string
           joined_at?: string | null
+          last_read_at?: string | null
+          role?: string | null
           user_id: string
         }
         Update: {
           group_id?: string
           id?: string
           joined_at?: string | null
+          last_read_at?: string | null
+          role?: string | null
           user_id?: string
         }
         Relationships: [
@@ -1123,6 +1785,7 @@ export type Database = {
           content: string | null
           created_at: string | null
           file_name: string | null
+          file_size: number | null
           file_url: string | null
           group_id: string | null
           id: string
@@ -1133,6 +1796,7 @@ export type Database = {
           content?: string | null
           created_at?: string | null
           file_name?: string | null
+          file_size?: number | null
           file_url?: string | null
           group_id?: string | null
           id?: string
@@ -1143,6 +1807,7 @@ export type Database = {
           content?: string | null
           created_at?: string | null
           file_name?: string | null
+          file_size?: number | null
           file_url?: string | null
           group_id?: string | null
           id?: string
@@ -1168,6 +1833,10 @@ export type Database = {
       }
       study_groups: {
         Row: {
+          announcement_at: string | null
+          announcement_body: string | null
+          announcement_by: string | null
+          announcement_title: string | null
           course: string | null
           created_at: string | null
           creator_id: string
@@ -1179,6 +1848,10 @@ export type Database = {
           university_id: string
         }
         Insert: {
+          announcement_at?: string | null
+          announcement_body?: string | null
+          announcement_by?: string | null
+          announcement_title?: string | null
           course?: string | null
           created_at?: string | null
           creator_id: string
@@ -1190,6 +1863,10 @@ export type Database = {
           university_id: string
         }
         Update: {
+          announcement_at?: string | null
+          announcement_body?: string | null
+          announcement_by?: string | null
+          announcement_title?: string | null
           course?: string | null
           created_at?: string | null
           creator_id?: string
@@ -1201,6 +1878,13 @@ export type Database = {
           university_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "study_groups_announcement_by_fkey"
+            columns: ["announcement_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "study_groups_university_id_fkey"
             columns: ["university_id"]
@@ -1247,30 +1931,39 @@ export type Database = {
       }
       universities: {
         Row: {
+          campus_lat: number | null
+          campus_lng: number | null
           city: string | null
           country: string | null
           created_at: string | null
           domain: string | null
+          email_domain: string | null
           id: string
           logo_url: string | null
           name: string
           short_name: string | null
         }
         Insert: {
+          campus_lat?: number | null
+          campus_lng?: number | null
           city?: string | null
           country?: string | null
           created_at?: string | null
           domain?: string | null
+          email_domain?: string | null
           id?: string
           logo_url?: string | null
           name: string
           short_name?: string | null
         }
         Update: {
+          campus_lat?: number | null
+          campus_lng?: number | null
           city?: string | null
           country?: string | null
           created_at?: string | null
           domain?: string | null
+          email_domain?: string | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -1374,11 +2067,13 @@ export type Database = {
           content: string
           created_at: string | null
           downvotes: number | null
+          expires_at: string | null
           id: string
           moderation_reason: string | null
           moderation_status: string | null
           university_id: string
           upvotes: number | null
+          user_id: string | null
         }
         Insert: {
           alias?: string | null
@@ -1386,11 +2081,13 @@ export type Database = {
           content: string
           created_at?: string | null
           downvotes?: number | null
+          expires_at?: string | null
           id?: string
           moderation_reason?: string | null
           moderation_status?: string | null
           university_id: string
           upvotes?: number | null
+          user_id?: string | null
         }
         Update: {
           alias?: string | null
@@ -1398,11 +2095,13 @@ export type Database = {
           content?: string
           created_at?: string | null
           downvotes?: number | null
+          expires_at?: string | null
           id?: string
           moderation_reason?: string | null
           moderation_status?: string | null
           university_id?: string
           upvotes?: number | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1410,6 +2109,13 @@ export type Database = {
             columns: ["university_id"]
             isOneToOne: false
             referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wall_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1455,6 +2161,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_trending_score: {
+        Args: {
+          p_comments: number
+          p_created_at: string
+          p_joins: number
+          p_likes: number
+          p_views: number
+        }
+        Returns: number
+      }
+      get_my_university_id: { Args: never; Returns: string }
       get_ranked_feed: {
         Args: { p_limit?: number; p_offset?: number; p_university_id: string }
         Returns: {

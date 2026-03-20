@@ -6,6 +6,9 @@ export interface WallPostRow {
   content: string;
   alias: string | null;
   upvotes: number;
+  downvotes: number;
+  comments_count: number;
+  expires_at: string | null;
   created_at: string;
 }
 
@@ -27,6 +30,7 @@ export const wallService = {
     const { data, error } = await supabase
       .from("wall_posts")
       .select("*")
+      .eq("moderation_status", "approved")
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -56,8 +60,20 @@ export const wallService = {
       user_id: userId,
     });
     if (error && error.code === "23505") {
-      // Already upvoted — remove
       await supabase.from("wall_upvotes").delete().eq("wall_post_id", wallPostId).eq("user_id", userId);
+      return false;
+    }
+    if (error) throw error;
+    return true;
+  },
+
+  async downvote(wallPostId: string, userId: string) {
+    const { error } = await supabase.from("wall_downvotes").insert({
+      wall_post_id: wallPostId,
+      user_id: userId,
+    });
+    if (error && error.code === "23505") {
+      await supabase.from("wall_downvotes").delete().eq("wall_post_id", wallPostId).eq("user_id", userId);
       return false;
     }
     if (error) throw error;
@@ -71,6 +87,25 @@ export const wallService = {
       content_id: wallPostId,
       reason,
     } as any);
+    if (error) throw error;
+  },
+
+  async fetchComments(wallPostId: string) {
+    const { data, error } = await supabase
+      .from("wall_comments")
+      .select("*")
+      .eq("wall_post_id", wallPostId)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createComment(wallPostId: string, content: string, alias?: string) {
+    const { error } = await supabase.from("wall_comments").insert({
+      wall_post_id: wallPostId,
+      content,
+      alias: alias || generateAlias(),
+    });
     if (error) throw error;
   },
 };
