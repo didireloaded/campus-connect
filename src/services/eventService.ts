@@ -7,11 +7,13 @@ export interface EventRow {
   title: string;
   description: string | null;
   event_date: string;
+  end_date: string | null;
   location_name: string | null;
   location_lat: number | null;
   location_lng: number | null;
   cover_image: string | null;
   attendees_count: number;
+  verification_level: string | null;
   created_at: string;
 }
 
@@ -24,6 +26,7 @@ export const eventService = {
     const { data, error } = await supabase
       .from("events")
       .select("*, profiles(username, avatar_url)")
+      .gt("event_date", new Date().toISOString())
       .order("event_date", { ascending: true })
       .limit(limit);
     if (error) throw error;
@@ -36,6 +39,7 @@ export const eventService = {
     title: string;
     description?: string;
     eventDate: string;
+    endDate?: string;
     locationName?: string;
     locationLat?: number;
     locationLng?: number;
@@ -47,6 +51,7 @@ export const eventService = {
       title: params.title,
       description: params.description || null,
       event_date: params.eventDate,
+      end_date: params.endDate || null,
       location_name: params.locationName || null,
       location_lat: params.locationLat || null,
       location_lng: params.locationLng || null,
@@ -76,5 +81,30 @@ export const eventService = {
       .select("event_id")
       .eq("user_id", userId);
     return new Set((data || []).map((d) => d.event_id));
+  },
+
+  async bookmarkEvent(eventId: string, userId: string) {
+    const { error } = await supabase.from("event_bookmarks").insert({
+      event_id: eventId,
+      user_id: userId,
+    });
+    if (error?.code === "23505") return;
+    if (error) throw error;
+  },
+
+  async unbookmarkEvent(eventId: string, userId: string) {
+    const { error } = await supabase.from("event_bookmarks").delete()
+      .eq("event_id", eventId)
+      .eq("user_id", userId);
+    if (error) throw error;
+  },
+
+  async checkin(eventId: string, userId: string) {
+    const { error } = await supabase.from("event_checkins").insert({
+      event_id: eventId,
+      user_id: userId,
+    });
+    if (error?.code === "23505") return;
+    if (error) throw error;
   },
 };

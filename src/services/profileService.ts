@@ -16,8 +16,12 @@ export const profileService = {
     bio?: string;
     avatar_url?: string;
     username?: string;
+    major?: string;
+    graduation_year?: string;
+    graduation_level?: string;
+    personal_url?: string;
   }) {
-    const { error } = await supabase.from("profiles").update(updates).eq("id", userId);
+    const { error } = await supabase.from("profiles").update(updates as any).eq("id", userId);
     if (error) throw error;
   },
 

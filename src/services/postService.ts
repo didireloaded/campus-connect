@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { sortByFeedScore, filterByAge } from "./algorithmService";
 
 export interface PostRow {
   id: string;
@@ -21,40 +22,30 @@ export interface PostWithProfile extends PostRow {
 
 export const postService = {
   async fetchFeed(limit = 30) {
-    // Use ranked feed - get user's university_id first
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase.from("profiles").select("university_id").eq("id", user.id).maybeSingle();
-      if (profile?.university_id) {
-        const { data: ranked, error: rpcError } = await supabase.rpc("get_ranked_feed", {
-          p_university_id: profile.university_id,
-          p_limit: limit,
-          p_offset: 0,
-        });
-        if (!rpcError && ranked && ranked.length > 0) {
-          // Fetch profiles for ranked posts
-          const ids = ranked.map((p: any) => p.id);
-          const { data: withProfiles } = await supabase
-            .from("posts")
-            .select("*, profiles(username, avatar_url, full_name)")
-            .in("id", ids);
-          if (withProfiles) {
-            // Re-sort by ranked order
-            const idOrder = new Map(ids.map((id: string, i: number) => [id, i]));
-            const sorted = [...withProfiles].sort((a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0));
-            return sorted as unknown as PostWithProfile[];
-          }
-        }
-      }
-    }
-    // Fallback to chronological
+    if (!user) return [];
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("university_id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile?.university_id) return [];
+
+    // Fetch more than needed, score client-side, then slice
     const { data, error } = await supabase
       .from("posts")
       .select("*, profiles(username, avatar_url, full_name)")
+      .eq("university_id", profile.university_id)
+      .eq("moderation_status", "approved")
+      .gte("created_at", new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString())
       .order("created_at", { ascending: false })
-      .limit(limit);
+      .limit(limit * 2);
+
     if (error) throw error;
-    return (data || []) as unknown as PostWithProfile[];
+    const posts = (data || []) as unknown as PostWithProfile[];
+    return sortByFeedScore(posts).slice(0, limit);
   },
 
   async fetchUserPosts(userId: string) {
@@ -91,7 +82,7 @@ export const postService = {
 
   async likePost(postId: string, userId: string) {
     const { error } = await supabase.from("likes").insert({ post_id: postId, user_id: userId });
-    if (error && error.code === "23505") return false; // already liked
+    if (error && error.code === "23505") return false;
     if (error) throw error;
     return true;
   },
@@ -128,5 +119,22 @@ export const postService = {
       content,
     });
     if (error) throw error;
+  },
+
+  // Real-time subscription scoped to university
+  subscribeToFeed(universityId: string, onNewPost: (post: any) => void) {
+    return supabase
+      .channel(`feed-${universityId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'posts',
+          filter: `university_id=eq.${universityId}`,
+        },
+        (payload) => onNewPost(payload.new)
+      )
+      .subscribe();
   },
 };

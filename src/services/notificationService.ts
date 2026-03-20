@@ -18,7 +18,7 @@ export const notificationService = {
   async fetchNotifications(userId: string, limit = 50) {
     const { data, error } = await supabase
       .from("notifications")
-      .select("id, type, read, created_at, actor_id, user_id, actor:profiles!notifications_actor_id_fkey(username, avatar_url)")
+      .select("id, type, read, created_at, actor_id, user_id, reference_id, actor:profiles!notifications_actor_id_fkey(username, avatar_url)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(limit);
@@ -48,10 +48,9 @@ export const notificationService = {
   async createNotification(params: {
     userId: string;
     actorId: string;
-    type: "like" | "comment" | "follow" | "event_reminder";
+    type: "like" | "comment" | "reply" | "follow" | "event_reminder" | "study_group_join" | "new_message";
     referenceId?: string;
   }) {
-    // Don't notify yourself
     if (params.userId === params.actorId) return;
     const { error } = await supabase.from("notifications").insert({
       user_id: params.userId,
