@@ -129,6 +129,35 @@ export default function Index() {
           </DashboardSection>
         )}
 
+        {/* Campus Updates preview */}
+        {updates.length > 0 && (
+          <DashboardSection
+            title="Campus Updates"
+            icon={<Newspaper size={14} />}
+            action={{ label: "View all", onClick: () => navigate("/campus-updates") }}
+          >
+            <div className="space-y-2">
+              {updates.slice(0, 2).map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => navigate("/campus-updates")}
+                  className="w-full bg-card rounded-xl p-3.5 border border-border shadow-card flex items-start gap-3 text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Newspaper size={16} className="text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{u.title}</p>
+                    {u.content && (
+                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{u.content}</p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </DashboardSection>
+        )}
+
         {/* Upcoming Events */}
         {upcomingEvents.length > 0 && (
           <DashboardSection
