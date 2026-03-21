@@ -5,7 +5,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PostCard } from "@/components/feed/PostCard";
 import { StoriesBar } from "@/components/feed/StoriesBar";
-import { Bell, Loader2, Search, CalendarDays, MapPin, ChevronRight, TrendingUp, Zap } from "lucide-react";
+import { Bell, Loader2, Search, CalendarDays, MapPin, ChevronRight, TrendingUp, Zap, MessageCircle, Newspaper } from "lucide-react";
 import { useEffect, useState } from "react";
 import { profileService } from "@/services/profileService";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUniConfig } from "@/config/universities";
 import { formatDistanceToNow } from "date-fns";
+import { useCampusUpdates } from "@/hooks/useCampusUpdates";
 
 export default function Index() {
   const { profile } = useAuth();
