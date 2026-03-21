@@ -10,7 +10,7 @@ export const useSavedPosts = () => {
   const refresh = useCallback(async () => {
     if (!user) return;
     try {
-      const data = await savedPostsService.fetchSaved(user.id);
+      const data = await savedPostsService.getSavedPosts(user.id);
       setSaved(data);
     } catch (e) {
       console.error("Failed to fetch saved posts:", e);
