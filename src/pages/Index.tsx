@@ -83,7 +83,13 @@ export default function Index() {
           </div>
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => navigate("/explore")}
+              onClick={() => navigate("/messages")}
+              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <MessageCircle size={16} />
+            </button>
+            <button
+              onClick={() => navigate("/discover")}
               className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
               <Search size={16} />
