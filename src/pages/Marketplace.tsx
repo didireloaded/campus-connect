@@ -2,11 +2,14 @@ import { useState } from "react";
 import { useMarketplace } from "@/hooks/useMarketplace";
 import { CATEGORIES } from "@/services/marketplaceService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, Tag, ShoppingBag, Search, SlidersHorizontal } from "lucide-react";
+import { Loader2, Tag, ShoppingBag, Search, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDirectMessages } from "@/hooks/useDirectMessages";
+import { toast } from "sonner";
 
 const CATEGORY_LABELS: Record<string, string> = {
   all: "All",
@@ -21,9 +24,22 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function Marketplace() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { getOrCreateThread } = useDirectMessages();
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const { listings, loading } = useMarketplace(activeCategory);
+
+  const handleContact = async (sellerId: string) => {
+    if (!user) { toast.error("Please log in"); return; }
+    if (sellerId === user.id) { toast.info("This is your listing"); return; }
+    try {
+      const threadId = await getOrCreateThread(sellerId);
+      if (threadId) navigate(`/messages?thread=${threadId}`);
+    } catch {
+      toast.error("Failed to start conversation");
+    }
+  };
 
   const filtered = searchQuery
     ? listings.filter((l) => l.title.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -116,14 +132,22 @@ export default function Marketplace() {
                 {/* Product info */}
                 <div className="p-2.5">
                   <p className="text-xs font-semibold text-foreground line-clamp-2 leading-tight">{listing.title}</p>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <Avatar className="h-4 w-4">
-                      <AvatarImage src={listing.profiles?.avatar_url || undefined} />
-                      <AvatarFallback className="text-[7px] bg-secondary text-muted-foreground">
-                        {listing.profiles?.username?.[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-[10px] text-muted-foreground truncate">{listing.profiles?.username}</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-1.5">
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage src={listing.profiles?.avatar_url || undefined} />
+                        <AvatarFallback className="text-[7px] bg-secondary text-muted-foreground">
+                          {listing.profiles?.username?.[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-[10px] text-muted-foreground truncate">{listing.profiles?.username}</span>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleContact(listing.seller_id); }}
+                      className="w-6 h-6 rounded-lg bg-[hsl(var(--feature-marketplace))]/10 flex items-center justify-center"
+                    >
+                      <MessageCircle size={12} className="text-[hsl(var(--feature-marketplace))]" />
+                    </button>
                   </div>
                 </div>
               </motion.div>

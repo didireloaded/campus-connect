@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import {
   ShoppingBag, Package, Car, BookOpen, FileText, BarChart3, Ghost,
-  Briefcase, Shield, MapPin, Eye, Flame, Search
+  Briefcase, Shield, MapPin, Eye, Flame, Search, Newspaper, MessageCircle
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -33,6 +33,13 @@ const sections = [
       { path: "/lecture-notes", icon: FileText, label: "Lecture Notes", desc: "Study materials", accent: "var(--feature-notes)" },
       { path: "/jobs", icon: Briefcase, label: "Jobs", desc: "Jobs & internships", accent: "var(--feature-jobs)" },
       { path: "/clubs", icon: Shield, label: "Clubs", desc: "Organizations", accent: "var(--feature-clubs)" },
+    ],
+  },
+  {
+    title: "Communication",
+    items: [
+      { path: "/campus-updates", icon: Newspaper, label: "Campus Updates", desc: "Official news", accent: "var(--campus-blue)" },
+      { path: "/messages", icon: MessageCircle, label: "Messages", desc: "Direct messages", accent: "var(--primary)" },
     ],
   },
 ];

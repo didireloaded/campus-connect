@@ -28,6 +28,8 @@ import StoryViewer from "./pages/StoryViewer";
 import EventDetail from "./pages/EventDetail";
 import StudyGroupDetail from "./pages/StudyGroupDetail";
 import UserProfilePage from "./pages/UserProfilePage";
+import CampusUpdates from "./pages/CampusUpdates";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -64,6 +66,8 @@ const AppRoutes = () => {
       <Route path="/wall" element={<ProtectedRoute><Wall /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
       <Route path="/event-detail" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
+      <Route path="/campus-updates" element={<ProtectedRoute><CampusUpdates /></ProtectedRoute>} />
+      <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
       <Route path="/profile/:username" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
       <Route
         element={

@@ -5,7 +5,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PostCard } from "@/components/feed/PostCard";
 import { StoriesBar } from "@/components/feed/StoriesBar";
-import { Bell, Loader2, Search, CalendarDays, MapPin, ChevronRight, TrendingUp, Zap } from "lucide-react";
+import { Bell, Loader2, Search, CalendarDays, MapPin, ChevronRight, TrendingUp, Zap, MessageCircle, Newspaper } from "lucide-react";
 import { useEffect, useState } from "react";
 import { profileService } from "@/services/profileService";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getUniConfig } from "@/config/universities";
 import { formatDistanceToNow } from "date-fns";
+import { useCampusUpdates } from "@/hooks/useCampusUpdates";
 
 export default function Index() {
   const { profile } = useAuth();
@@ -22,6 +23,7 @@ export default function Index() {
   const { unreadCount } = useNotifications();
   const [uniShortName, setUniShortName] = useState<string | null>(null);
   const [trendingTopics, setTrendingTopics] = useState<any[]>([]);
+  const { updates } = useCampusUpdates();
 
   useEffect(() => {
     if (profile?.university_id) {
@@ -81,7 +83,13 @@ export default function Index() {
           </div>
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => navigate("/explore")}
+              onClick={() => navigate("/messages")}
+              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <MessageCircle size={16} />
+            </button>
+            <button
+              onClick={() => navigate("/discover")}
               className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
               <Search size={16} />
@@ -116,6 +124,35 @@ export default function Index() {
                   <p className="text-xs font-semibold text-foreground">#{t.topic}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{t.post_count} posts</p>
                 </div>
+              ))}
+            </div>
+          </DashboardSection>
+        )}
+
+        {/* Campus Updates preview */}
+        {updates.length > 0 && (
+          <DashboardSection
+            title="Campus Updates"
+            icon={<Newspaper size={14} />}
+            action={{ label: "View all", onClick: () => navigate("/campus-updates") }}
+          >
+            <div className="space-y-2">
+              {updates.slice(0, 2).map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => navigate("/campus-updates")}
+                  className="w-full bg-card rounded-xl p-3.5 border border-border shadow-card flex items-start gap-3 text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Newspaper size={16} className="text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{u.title}</p>
+                    {u.content && (
+                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{u.content}</p>
+                    )}
+                  </div>
+                </button>
               ))}
             </div>
           </DashboardSection>
