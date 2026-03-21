@@ -33,7 +33,7 @@ export const useCampusUpdates = () => {
 
   const markSeen = useCallback(async () => {
     if (!profile?.id) return;
-    await campusUpdatesService.markSeen(profile.id);
+    await campusUpdatesService.markRead(profile.id);
   }, [profile?.id]);
 
   return { updates, loading, refresh, markSeen };

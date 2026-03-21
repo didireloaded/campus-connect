@@ -23,11 +23,11 @@ export const useSavedPosts = () => {
 
   const toggleSave = useCallback(async (postId: string, postType: string) => {
     if (!user) return;
-    const isSaved = saved.some((s) => s.post_id === postId);
-    if (isSaved) {
-      await savedPostsService.unsave(user.id, postId);
+    const alreadySaved = saved.some((s) => s.post_id === postId);
+    if (alreadySaved) {
+      await savedPostsService.unsavePost(user.id, postId);
     } else {
-      await savedPostsService.save(user.id, postId, postType);
+      await savedPostsService.savePost(user.id, postId, postType);
     }
     refresh();
     return !isSaved;
