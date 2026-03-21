@@ -2,11 +2,14 @@ import { useState } from "react";
 import { useMarketplace } from "@/hooks/useMarketplace";
 import { CATEGORIES } from "@/services/marketplaceService";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, Tag, ShoppingBag, Search, SlidersHorizontal } from "lucide-react";
+import { Loader2, Tag, ShoppingBag, Search, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDirectMessages } from "@/hooks/useDirectMessages";
+import { toast } from "sonner";
 
 const CATEGORY_LABELS: Record<string, string> = {
   all: "All",
