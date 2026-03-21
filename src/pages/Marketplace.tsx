@@ -132,14 +132,22 @@ export default function Marketplace() {
                 {/* Product info */}
                 <div className="p-2.5">
                   <p className="text-xs font-semibold text-foreground line-clamp-2 leading-tight">{listing.title}</p>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <Avatar className="h-4 w-4">
-                      <AvatarImage src={listing.profiles?.avatar_url || undefined} />
-                      <AvatarFallback className="text-[7px] bg-secondary text-muted-foreground">
-                        {listing.profiles?.username?.[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-[10px] text-muted-foreground truncate">{listing.profiles?.username}</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-1.5">
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage src={listing.profiles?.avatar_url || undefined} />
+                        <AvatarFallback className="text-[7px] bg-secondary text-muted-foreground">
+                          {listing.profiles?.username?.[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-[10px] text-muted-foreground truncate">{listing.profiles?.username}</span>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleContact(listing.seller_id); }}
+                      className="w-6 h-6 rounded-lg bg-[hsl(var(--feature-marketplace))]/10 flex items-center justify-center"
+                    >
+                      <MessageCircle size={12} className="text-[hsl(var(--feature-marketplace))]" />
+                    </button>
                   </div>
                 </div>
               </motion.div>
