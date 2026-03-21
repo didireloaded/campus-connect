@@ -428,3 +428,34 @@ function EmptyState({ emoji, title, desc }: { emoji: string; title: string; desc
     </div>
   );
 }
+
+function SavedTabContent() {
+  const { saved, loading } = useSavedPosts();
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>;
+  }
+
+  if (saved.length === 0) {
+    return <EmptyState emoji="🔖" title="No Saved Items" desc="Bookmarked posts, notes, and events will appear here" />;
+  }
+
+  return (
+    <div className="px-4 space-y-3">
+      {saved.map((item) => (
+        <div key={`${item.post_id}-${item.post_type}`} className="bg-card rounded-2xl p-4 border border-border/50 shadow-card flex gap-3 items-start">
+          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+            <Bookmark size={16} className="text-primary fill-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{item.post_type}</p>
+            <p className="text-sm font-semibold text-foreground mt-0.5">Saved {item.post_type}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              {formatDistanceToNow(new Date(item.saved_at), { addSuffix: true })}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
