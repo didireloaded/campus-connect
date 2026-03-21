@@ -24,9 +24,22 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function Marketplace() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { getOrCreateThread } = useDirectMessages();
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const { listings, loading } = useMarketplace(activeCategory);
+
+  const handleContact = async (sellerId: string) => {
+    if (!user) { toast.error("Please log in"); return; }
+    if (sellerId === user.id) { toast.info("This is your listing"); return; }
+    try {
+      const threadId = await getOrCreateThread(sellerId);
+      if (threadId) navigate(`/messages?thread=${threadId}`);
+    } catch {
+      toast.error("Failed to start conversation");
+    }
+  };
 
   const filtered = searchQuery
     ? listings.filter((l) => l.title.toLowerCase().includes(searchQuery.toLowerCase()))
