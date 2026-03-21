@@ -409,7 +409,7 @@ export default function Profile() {
         )}
 
         {activeTab === "saved" && (
-          <EmptyState emoji="🔖" title="Saved Items" desc="Bookmarked notes and events will appear here" />
+          <SavedTabContent />
         )}
       </div>
 
