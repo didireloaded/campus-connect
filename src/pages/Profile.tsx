@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { formatDistanceToNow } from "date-fns";
+import { useSavedPosts } from "@/hooks/useSavedPosts";
 
 // ─── Edit Profile Sheet ───────────────────────────────────────────────────────
 
