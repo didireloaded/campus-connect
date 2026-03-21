@@ -23,6 +23,7 @@ export default function Index() {
   const { unreadCount } = useNotifications();
   const [uniShortName, setUniShortName] = useState<string | null>(null);
   const [trendingTopics, setTrendingTopics] = useState<any[]>([]);
+  const { updates } = useCampusUpdates();
 
   useEffect(() => {
     if (profile?.university_id) {
