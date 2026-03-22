@@ -3,121 +3,126 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import {
   ShoppingBag, Package, Car, BookOpen, FileText, BarChart3, Ghost,
-  Briefcase, Shield, MapPin, Eye, Flame, Search, Newspaper, MessageCircle
+  Briefcase, Users, MapPin, Eye, Flame, Search, Newspaper, MessageCircle,
+  Calendar, Home, TrendingUp, Box
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-const sections = [
-  {
-    title: "Campus Life",
-    items: [
-      { path: "/confessions", icon: Ghost, label: "Confessions", desc: "Anonymous secrets", accent: "var(--feature-confessions)" },
-      { path: "/spotted", icon: Eye, label: "Spotted", desc: "Campus moments", accent: "var(--feature-spotted)" },
-      { path: "/polls", icon: BarChart3, label: "Polls", desc: "Vote on topics", accent: "var(--feature-polls)" },
-      { path: "/wall", icon: Flame, label: "Campus Wall", desc: "Anonymous wall", accent: "var(--feature-wall)" },
-    ],
-  },
-  {
-    title: "Student Tools",
-    items: [
-      { path: "/marketplace", icon: ShoppingBag, label: "Marketplace", desc: "Buy & sell", accent: "var(--feature-marketplace)" },
-      { path: "/lost-found", icon: Package, label: "Lost & Found", desc: "Report items", accent: "var(--feature-lostfound)" },
-      { path: "/rides", icon: Car, label: "Ride Share", desc: "Share rides", accent: "var(--feature-rides)" },
-      { path: "/map", icon: MapPin, label: "Campus Map", desc: "Find buildings", accent: "var(--feature-map)" },
-    ],
-  },
-  {
-    title: "Academic & Career",
-    items: [
-      { path: "/study-groups", icon: BookOpen, label: "Study Groups", desc: "Learn together", accent: "var(--feature-studygroups)" },
-      { path: "/lecture-notes", icon: FileText, label: "Lecture Notes", desc: "Study materials", accent: "var(--feature-notes)" },
-      { path: "/jobs", icon: Briefcase, label: "Jobs", desc: "Jobs & internships", accent: "var(--feature-jobs)" },
-      { path: "/clubs", icon: Shield, label: "Clubs", desc: "Organizations", accent: "var(--feature-clubs)" },
-    ],
-  },
-  {
-    title: "Communication",
-    items: [
-      { path: "/campus-updates", icon: Newspaper, label: "Campus Updates", desc: "Official news", accent: "var(--campus-blue)" },
-      { path: "/messages", icon: MessageCircle, label: "Messages", desc: "Direct messages", accent: "var(--primary)" },
-    ],
-  },
+const GRID_ITEMS = [
+  { label: "Events", subtitle: "What's happening", icon: Calendar, bg: "bg-brand-purple", text: "text-white", path: "/events" },
+  { label: "Study Groups", subtitle: "Learn together", icon: BookOpen, bg: "bg-brand-orange", text: "text-white", path: "/study-groups" },
+  { label: "Clubs", subtitle: "Join communities", icon: Users, bg: "bg-campus-green", text: "text-white", path: "/clubs" },
+  { label: "Housing", subtitle: "Find a place", icon: Home, bg: "bg-primary", text: "text-white", path: "/housing" },
+  { label: "Buy/Sell", subtitle: "Campus marketplace", icon: ShoppingBag, bg: "bg-feature-jobs", text: "text-white", path: "/marketplace" },
+  { label: "Lost & Found", subtitle: "Find lost items", icon: Box, bg: "bg-destructive", text: "text-white", path: "/lost-found" },
+  { label: "Lecture Notes", subtitle: "Share & find notes", icon: FileText, bg: "bg-feature-rides", text: "text-white", path: "/lecture-notes" },
+  { label: "Jobs & Gigs", subtitle: "Campus opportunities", icon: Briefcase, bg: "bg-feature-notes", text: "text-white", path: "/jobs" },
+  { label: "Ride Share", subtitle: "Carpool together", icon: Car, bg: "bg-feature-rides", text: "text-white", path: "/rides" },
+  { label: "Campus Map", subtitle: "Navigate campus", icon: MapPin, bg: "bg-campus-green", text: "text-white", path: "/map" },
+  { label: "Confessions", subtitle: "Anonymous secrets", icon: Ghost, bg: "bg-feature-confessions", text: "text-white", path: "/confessions" },
+  { label: "Spotted", subtitle: "Campus sightings", icon: Eye, bg: "bg-feature-spotted", text: "text-white", path: "/spotted" },
+  { label: "Polls", subtitle: "Vote & see results", icon: BarChart3, bg: "bg-feature-polls", text: "text-white", path: "/polls" },
+  { label: "Campus Wall", subtitle: "Anonymous wall", icon: Flame, bg: "bg-feature-wall", text: "text-white", path: "/wall" },
+  { label: "Updates", subtitle: "Official news", icon: Newspaper, bg: "bg-campus-blue", text: "text-white", path: "/campus-updates" },
+  { label: "Messages", subtitle: "Direct messages", icon: MessageCircle, bg: "bg-brand-purple", text: "text-white", path: "/messages" },
+];
+
+const TRENDING_TAGS = [
+  { tag: "#midterms", count: "1.2k" },
+  { tag: "#party", count: "856" },
+  { tag: "#housing", count: "432" },
+  { tag: "#lostandfound", count: "215" },
+  { tag: "#campusfood", count: "189" },
 ];
 
 export default function Explore() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
-  const allItems = sections.flatMap((s) => s.items);
   const filtered = search.trim()
-    ? allItems.filter((f) => f.label.toLowerCase().includes(search.toLowerCase()))
-    : null;
+    ? GRID_ITEMS.filter((f) => f.label.toLowerCase().includes(search.toLowerCase()))
+    : GRID_ITEMS;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 glass px-5 py-3.5">
-        <h1 className="text-lg font-bold text-foreground">Discover</h1>
-        <p className="text-[10px] text-muted-foreground font-medium mt-0.5 uppercase tracking-wider">Your campus toolkit</p>
-        <div className="relative mt-2.5">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    <div className="min-h-screen bg-background pb-24 md:pb-8">
+      <div className="sticky top-0 z-20 glass px-4 py-4">
+        <h1 className="text-2xl font-black text-foreground tracking-tight">Discover</h1>
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-1">Explore your campus</p>
+        <div className="mt-4 relative">
+          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search tools..."
+            type="text"
+            placeholder="Search for anything..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 rounded-xl h-9 text-sm bg-secondary border-0"
+            className="pl-10 rounded-full h-11 bg-secondary border-0 text-sm font-medium"
           />
         </div>
-      </header>
+      </div>
 
-      {filtered ? (
-        <div className="grid grid-cols-2 gap-2.5 p-4 pb-24">
-          {filtered.map((f, i) => (
-            <ToolCard key={f.path} f={f} i={i} navigate={navigate} />
-          ))}
+      <div className="p-4 flex flex-col gap-8">
+        {/* Category Grid */}
+        <section>
+          <h3 className="text-sm font-black text-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-brand-purple/20 flex items-center justify-center">
+              <Box size={12} className="text-brand-purple" strokeWidth={3} />
+            </div>
+            Categories
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            {filtered.map((item, i) => (
+              <motion.button
+                key={item.path}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.03 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(item.path)}
+                className={`${item.bg} ${item.text} rounded-[2rem] p-5 flex flex-col items-start gap-4 shadow-sm hover:shadow-md transition-all text-left relative overflow-hidden group`}
+              >
+                <div className="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 transition-transform duration-500">
+                  <item.icon size={48} />
+                </div>
+                <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm flex-shrink-0">
+                  <item.icon size={28} />
+                </div>
+                <div className="mt-2">
+                  <h2 className="text-lg font-black leading-tight">{item.label}</h2>
+                  <p className="text-[10px] font-bold opacity-80 mt-1 uppercase tracking-wider">{item.subtitle}</p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
           {filtered.length === 0 && (
-            <div className="col-span-2 text-center py-12">
-              <p className="text-muted-foreground text-sm">No tools match "{search}"</p>
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-sm">No results for "{search}"</p>
             </div>
           )}
-        </div>
-      ) : (
-        <div className="pb-24 space-y-5 mt-3">
-          {sections.map((section) => (
-            <div key={section.title}>
-              <h2 className="px-5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">{section.title}</h2>
-              <div className="grid grid-cols-2 gap-2.5 px-4">
-                {section.items.map((f, i) => (
-                  <ToolCard key={f.path} f={f} i={i} navigate={navigate} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+        </section>
 
-function ToolCard({ f, i, navigate }: { f: any; i: number; navigate: any }) {
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: i * 0.03, duration: 0.2 }}
-      whileTap={{ scale: 0.97 }}
-      onClick={() => navigate(f.path)}
-      className="bg-card rounded-xl p-3.5 text-left flex items-start gap-3 border border-border shadow-card hover:shadow-elevated transition-shadow"
-    >
-      <div
-        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `hsl(${f.accent} / 0.12)` }}
-      >
-        <f.icon size={17} style={{ color: `hsl(${f.accent})` }} />
+        {/* Trending */}
+        <section>
+          <h3 className="text-sm font-black text-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-brand-orange/20 flex items-center justify-center">
+              <TrendingUp size={12} className="text-brand-orange" strokeWidth={3} />
+            </div>
+            Trending Now
+          </h3>
+          <div className="bg-card rounded-[2rem] border border-border shadow-sm overflow-hidden">
+            {TRENDING_TAGS.map((tag, i) => (
+              <div key={i} className={`flex items-center justify-between p-4 hover:bg-secondary cursor-pointer transition-colors ${i !== TRENDING_TAGS.length - 1 ? "border-b border-border" : ""}`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground font-black text-sm">
+                    {i + 1}
+                  </div>
+                  <span className="text-sm font-black text-foreground">{tag.tag}</span>
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{tag.count} posts</span>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
-      <div className="min-w-0">
-        <p className="text-[13px] font-semibold text-foreground leading-tight">{f.label}</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5">{f.desc}</p>
-      </div>
-    </motion.button>
+    </div>
   );
 }

@@ -68,6 +68,11 @@ export default {
           green: "hsl(var(--campus-green))",
           purple: "hsl(var(--campus-purple))",
         },
+        brand: {
+          purple: "hsl(var(--brand-purple))",
+          green: "hsl(var(--brand-green))",
+          orange: "hsl(var(--brand-orange))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

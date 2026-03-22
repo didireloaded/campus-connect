@@ -30,6 +30,14 @@ import StudyGroupDetail from "./pages/StudyGroupDetail";
 import UserProfilePage from "./pages/UserProfilePage";
 import CampusUpdates from "./pages/CampusUpdates";
 import Messages from "./pages/Messages";
+import ChatDetail from "./pages/ChatDetail";
+import Housing from "./pages/Housing";
+import CreatePost from "./pages/CreatePost";
+import CreateMarketplace from "./pages/CreateMarketplace";
+import CreateLostFound from "./pages/CreateLostFound";
+import CreateNotes from "./pages/CreateNotes";
+import CreateJob from "./pages/CreateJob";
+import CreateRide from "./pages/CreateRide";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -68,7 +76,18 @@ const AppRoutes = () => {
       <Route path="/event-detail" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
       <Route path="/campus-updates" element={<ProtectedRoute><CampusUpdates /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+      <Route path="/chat" element={<ProtectedRoute><ChatDetail /></ProtectedRoute>} />
+      <Route path="/housing" element={<ProtectedRoute><Housing /></ProtectedRoute>} />
       <Route path="/profile/:username" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+      
+      {/* Full-page create forms */}
+      <Route path="/create/post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+      <Route path="/create/marketplace" element={<ProtectedRoute><CreateMarketplace /></ProtectedRoute>} />
+      <Route path="/create/lost-found" element={<ProtectedRoute><CreateLostFound /></ProtectedRoute>} />
+      <Route path="/create/notes" element={<ProtectedRoute><CreateNotes /></ProtectedRoute>} />
+      <Route path="/create/job" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
+      <Route path="/create/ride" element={<ProtectedRoute><CreateRide /></ProtectedRoute>} />
+
       <Route
         element={
           <ProtectedRoute>

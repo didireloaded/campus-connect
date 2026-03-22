@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Compass, Bell, User, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNotifications } from "@/hooks/useNotifications";
+import { cn } from "@/lib/utils";
 
 interface BottomNavProps {
   onCreateTap: () => void;
@@ -21,23 +22,24 @@ export const BottomNav = ({ onCreateTap }: BottomNavProps) => {
   const { unreadCount } = useNotifications();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 safe-bottom">
-      <div className="mx-auto max-w-lg px-3 pb-1.5">
-        <div className="bg-card border border-border rounded-2xl shadow-elevated flex items-center justify-around h-14">
+    <nav className="fixed bottom-6 left-4 right-4 z-50">
+      <div className="mx-auto max-w-lg">
+        <div className="bg-card/90 backdrop-blur-xl border border-border rounded-[2rem] shadow-elevated flex items-center justify-around h-16 px-2">
           {tabs.map((tab) => {
             const isCreate = tab.path === "__create__";
             const isActive = !isCreate && location.pathname === tab.path;
 
             if (isCreate) {
               return (
-                <button key="create" onClick={onCreateTap} className="relative flex items-center justify-center -mt-2.5">
-                  <motion.div
+                <div key="create" className="relative -top-5">
+                  <motion.button
                     whileTap={{ scale: 0.9 }}
-                    className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-glow"
+                    onClick={onCreateTap}
+                    className="w-14 h-14 bg-gradient-to-tr from-brand-purple to-brand-orange rounded-full flex items-center justify-center text-white shadow-lg shadow-brand-purple/40 hover:scale-105 active:scale-95 transition-all"
                   >
-                    <Plus size={22} className="text-primary-foreground" strokeWidth={2.5} />
-                  </motion.div>
-                </button>
+                    <Plus size={28} strokeWidth={3} />
+                  </motion.button>
+                </div>
               );
             }
 
@@ -47,23 +49,22 @@ export const BottomNav = ({ onCreateTap }: BottomNavProps) => {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className="relative flex flex-col items-center justify-center w-12 h-full gap-0.5 transition-colors"
+                className={cn(
+                  "flex flex-col items-center gap-1 p-2 transition-all duration-200",
+                  isActive ? "text-brand-purple scale-110" : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                <div className="relative">
-                  <tab.icon
-                    size={19}
-                    className={`transition-colors duration-150 ${isActive ? "text-primary" : "text-muted-foreground"}`}
-                    strokeWidth={isActive ? 2.2 : 1.6}
-                  />
+                <div className={cn("relative", isActive && "drop-shadow-md")}>
+                  <tab.icon size={24} strokeWidth={isActive ? 2.2 : 1.6} />
+                  {isActive && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-orange rounded-full" />
+                  )}
                   {isNotif && unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 bg-destructive text-destructive-foreground text-[8px] font-bold rounded-full flex items-center justify-center px-0.5">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
                 </div>
-                <span className={`text-[9px] font-medium transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`}>
-                  {tab.label}
-                </span>
               </button>
             );
           })}
