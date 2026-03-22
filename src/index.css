@@ -57,6 +57,11 @@
     --campus-green: 152 60% 40%;
     --campus-purple: 262 60% 55%;
 
+    /* Brand accents */
+    --brand-purple: 252 75% 60%;
+    --brand-green: 151 100% 50%;
+    --brand-orange: 29 100% 50%;
+
     --glass: 0 0% 100% / 0.72;
     --glass-border: 220 10% 90% / 0.6;
 
