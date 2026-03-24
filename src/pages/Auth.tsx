@@ -170,7 +170,7 @@ export default function Auth() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 18 }}
               >
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-[26px] font-black tracking-tight text-foreground">
                   Camp<span className="text-primary">Life</span>
                 </h1>
               </motion.div>
