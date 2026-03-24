@@ -1,13 +1,7 @@
 /**
  * Dark Mode Toggle
  * 
- * Drop this wherever you want a theme switch.
- * It reads/writes the "theme" key in localStorage and toggles
- * the `dark` class on <html>. Works with Tailwind's darkMode: "class" config.
- * 
- * Usage in Profile header:
- *   import { DarkModeToggle } from "@/components/DarkModeToggle";
- *   <DarkModeToggle />
+ * Default is dark. Toggling adds/removes the `light` class on <html>.
  */
 
 import { useEffect, useState } from "react";
@@ -16,19 +10,19 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function DarkModeToggle() {
   const [dark, setDark] = useState(() => {
-    if (typeof window === "undefined") return false;
+    if (typeof window === "undefined") return true;
     const saved = localStorage.getItem("theme");
     if (saved) return saved === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return true;
   });
 
   useEffect(() => {
     const root = document.documentElement;
     if (dark) {
-      root.classList.add("dark");
+      root.classList.remove("light");
       localStorage.setItem("theme", "dark");
     } else {
-      root.classList.remove("dark");
+      root.classList.add("light");
       localStorage.setItem("theme", "light");
     }
   }, [dark]);
@@ -73,17 +67,3 @@ export function DarkModeToggle() {
     </button>
   );
 }
-
-/**
- * Add to your main.tsx or index.html <head> to prevent flash of unstyled theme:
- *
- * <script>
- *   (function() {
- *     const theme = localStorage.getItem('theme');
- *     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
- *     if (theme === 'dark' || (!theme && prefersDark)) {
- *       document.documentElement.classList.add('dark');
- *     }
- *   })();
- * </script>
- */
