@@ -62,21 +62,18 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 glass px-5 py-3.5">
+      <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 ring-2 ring-border">
+          <div className="flex items-center gap-2.5">
+            <Avatar className="h-[33px] w-[33px] border border-border">
               <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="bg-secondary text-secondary-foreground text-sm font-semibold">
+              <AvatarFallback className="bg-accent text-primary text-[11px] font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{greeting()}</p>
-              <h2 className="text-sm font-bold text-foreground leading-tight flex items-center gap-1.5">
-                {uniShortName && (
-                  <img src={uniConfig.logo} alt={uniConfig.shortName} className="w-4 h-4 object-contain" />
-                )}
+              <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-[0.09em]">{greeting()}</p>
+              <h2 className="text-[13px] font-bold text-foreground leading-tight tracking-tight">
                 {uniShortName ? `${uniConfig.shortName} Hub` : (profile?.full_name || "Campus")}
               </h2>
             </div>
