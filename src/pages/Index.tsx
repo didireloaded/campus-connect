@@ -81,24 +81,24 @@ export default function Index() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => navigate("/messages")}
-              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="w-8 h-8 rounded-[10px] bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <MessageCircle size={16} />
+              <MessageCircle size={14} />
             </button>
             <button
               onClick={() => navigate("/discover")}
-              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="w-8 h-8 rounded-[10px] bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Search size={16} />
+              <Search size={14} />
             </button>
             <button
               onClick={() => navigate("/notifications")}
-              className="relative w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="relative w-8 h-8 rounded-[10px] bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Bell size={16} />
+              <Bell size={14} />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
-                  <span className="text-[8px] font-bold text-destructive-foreground">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                <span className="absolute -top-0.5 -right-0.5 min-w-[13px] h-[13px] bg-destructive rounded-full flex items-center justify-center border-[1.5px] border-background">
+                  <span className="text-[7px] font-bold text-destructive-foreground">{unreadCount > 9 ? "9+" : unreadCount}</span>
                 </span>
               )}
             </button>

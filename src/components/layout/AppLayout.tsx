@@ -13,20 +13,22 @@ export const AppLayout = () => {
       {/* Desktop Sidebar */}
       <div className="hidden md:flex flex-col w-64 bg-card border-r border-border z-50">
         <div className="p-6">
-          <h1 className="text-2xl font-black text-brand-purple tracking-tight uppercase">CampLife</h1>
+          <h1 className="text-xl font-extrabold text-foreground tracking-tight">
+            Camp<span className="text-primary">Life</span>
+          </h1>
         </div>
-        <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-2 px-4">
-          <DesktopNavItem to="/" icon={<Home size={22} />} label="Home" />
-          <DesktopNavItem to="/discover" icon={<Compass size={22} />} label="Discover" />
-          <DesktopNavItem to="/notifications" icon={<Bell size={22} />} label="Notifications" />
-          <DesktopNavItem to="/profile" icon={<User size={22} />} label="Profile" />
+        <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-4">
+          <DesktopNavItem to="/" icon={<Home size={20} />} label="Home" />
+          <DesktopNavItem to="/discover" icon={<Compass size={20} />} label="Discover" />
+          <DesktopNavItem to="/notifications" icon={<Bell size={20} />} label="Notifications" />
+          <DesktopNavItem to="/profile" icon={<User size={20} />} label="Profile" />
         </div>
         <div className="p-4 border-t border-border">
           <button
             onClick={() => setCreateOpen(true)}
-            className="w-full h-12 bg-brand-purple rounded-2xl flex items-center justify-center text-primary-foreground font-bold shadow-lg shadow-brand-purple/30 hover:opacity-90 transition-all active:scale-95 gap-2"
+            className="w-full h-11 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-semibold shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95 gap-2 text-sm"
           >
-            <Plus size={20} strokeWidth={3} />
+            <Plus size={18} strokeWidth={2.5} />
             <span>Create</span>
           </button>
         </div>
@@ -35,7 +37,7 @@ export const AppLayout = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full relative overflow-hidden">
         <div className="flex-1 overflow-y-auto scrollbar-hide bg-background pb-20 md:pb-0">
-          <div className="w-full max-w-2xl mx-auto min-h-full bg-card shadow-sm md:border-x md:border-border relative">
+          <div className="w-full max-w-2xl mx-auto min-h-full bg-background relative">
             <Outlet />
           </div>
         </div>
@@ -61,10 +63,10 @@ function DesktopNavItem({ to, icon, label }: { to: string; icon: React.ReactNode
       to={to}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm",
+          "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-semibold text-sm",
           isActive
-            ? "bg-brand-purple/10 text-brand-purple"
-            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )
       }
     >

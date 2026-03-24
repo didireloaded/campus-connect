@@ -11,14 +11,14 @@ import { UploadNotesSheet } from "./UploadNotesSheet";
 import { CreateRideSheet } from "./CreateRideSheet";
 
 const options = [
-  { label: "Post", icon: PenLine, color: "bg-primary/15 text-primary", key: "post" },
-  { label: "Event", icon: CalendarPlus, color: "bg-blue-500/15 text-blue-500", key: "event" },
-  { label: "Poll", icon: BarChart3, color: "bg-pink-500/15 text-pink-500", key: "poll" },
-  { label: "Confession", icon: Ghost, color: "bg-purple-500/15 text-purple-500", key: "confession" },
-  { label: "Sell Item", icon: ShoppingBag, color: "bg-orange-500/15 text-orange-500", key: "listing" },
-  { label: "Study Group", icon: BookOpen, color: "bg-blue-500/15 text-blue-500", key: "studyGroup" },
-  { label: "Upload Notes", icon: FileText, color: "bg-violet-500/15 text-violet-500", key: "notes" },
-  { label: "Post Ride", icon: Car, color: "bg-emerald-500/15 text-emerald-500", key: "ride" },
+  { label: "Post", icon: PenLine, key: "post", hi: true },
+  { label: "Event", icon: CalendarPlus, key: "event" },
+  { label: "Poll", icon: BarChart3, key: "poll" },
+  { label: "Confession", icon: Ghost, key: "confession" },
+  { label: "Sell Item", icon: ShoppingBag, key: "listing" },
+  { label: "Study Group", icon: BookOpen, key: "studyGroup" },
+  { label: "Upload Notes", icon: FileText, key: "notes" },
+  { label: "Post Ride", icon: Car, key: "ride" },
 ];
 
 interface CreateMenuProps {
@@ -43,7 +43,7 @@ export const CreateMenu = ({ open, onClose }: CreateMenuProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
               onClick={onClose}
             />
             <motion.div
@@ -51,15 +51,15 @@ export const CreateMenu = ({ open, onClose }: CreateMenuProps) => {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-3xl shadow-2xl pb-safe max-w-lg mx-auto"
+              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-[22px] shadow-2xl pb-safe max-w-lg mx-auto border-t border-border"
             >
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 bg-border rounded-full" />
+              <div className="flex justify-center pt-3 pb-1.5">
+                <div className="w-8 h-[3px] bg-accent rounded-full" />
               </div>
-              <div className="px-5 pb-2">
-                <h3 className="text-base font-bold text-foreground">What do you want to create?</h3>
+              <div className="px-4 pb-2.5">
+                <h3 className="text-sm font-bold text-foreground tracking-tight">What do you want to create?</h3>
               </div>
-              <div className="grid grid-cols-4 gap-3 px-5 pb-4">
+              <div className="grid grid-cols-4 gap-1 px-3 pb-3">
                 {options.map((opt, i) => (
                   <motion.button
                     key={opt.key}
@@ -68,19 +68,21 @@ export const CreateMenu = ({ open, onClose }: CreateMenuProps) => {
                     transition={{ delay: i * 0.04 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleAction(opt.key)}
-                    className="flex flex-col items-center gap-2 py-3"
+                    className="flex flex-col items-center gap-1.5 py-2.5"
                   >
-                    <div className={`w-12 h-12 rounded-2xl ${opt.color} flex items-center justify-center`}>
-                      <opt.icon size={22} />
+                    <div className={`w-11 h-11 rounded-[14px] border border-border flex items-center justify-center ${
+                      opt.hi ? "bg-primary/12 border-primary/20 text-primary" : "bg-accent text-muted-foreground"
+                    }`}>
+                      <opt.icon size={18} />
                     </div>
-                    <span className="text-[11px] font-semibold text-foreground">{opt.label}</span>
+                    <span className="text-[9px] font-semibold text-muted-foreground">{opt.label}</span>
                   </motion.button>
                 ))}
               </div>
-              <div className="px-5 pb-6">
+              <div className="px-4 pb-5">
                 <button
                   onClick={onClose}
-                  className="w-full py-3 rounded-xl bg-secondary text-secondary-foreground text-sm font-semibold"
+                  className="w-full py-2.5 rounded-xl bg-accent border border-border text-secondary-foreground text-xs font-semibold"
                 >
                   Cancel
                 </button>
