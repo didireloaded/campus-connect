@@ -170,7 +170,7 @@ export default function Auth() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 18 }}
               >
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-[26px] font-black tracking-tight text-foreground">
                   Camp<span className="text-primary">Life</span>
                 </h1>
               </motion.div>
@@ -190,7 +190,11 @@ export default function Auth() {
               transition={{ delay: 0.25 }}
               className="mt-8 mb-4"
             >
-              <h2 className="text-base font-semibold text-foreground text-center">Select your university</h2>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-border" />
+                <h2 className="text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.08em]">Choose your university</h2>
+                <div className="flex-1 h-px bg-border" />
+              </div>
             </motion.div>
 
             <div className="grid grid-cols-2 gap-3 flex-1">

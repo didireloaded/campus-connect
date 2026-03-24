@@ -62,21 +62,18 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 glass px-5 py-3.5">
+      <header className="sticky top-0 z-40 glass px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 ring-2 ring-border">
+          <div className="flex items-center gap-2.5">
+            <Avatar className="h-[33px] w-[33px] border border-border">
               <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="bg-secondary text-secondary-foreground text-sm font-semibold">
+              <AvatarFallback className="bg-accent text-primary text-[11px] font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{greeting()}</p>
-              <h2 className="text-sm font-bold text-foreground leading-tight flex items-center gap-1.5">
-                {uniShortName && (
-                  <img src={uniConfig.logo} alt={uniConfig.shortName} className="w-4 h-4 object-contain" />
-                )}
+              <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-[0.09em]">{greeting()}</p>
+              <h2 className="text-[13px] font-bold text-foreground leading-tight tracking-tight">
                 {uniShortName ? `${uniConfig.shortName} Hub` : (profile?.full_name || "Campus")}
               </h2>
             </div>
@@ -84,24 +81,24 @@ export default function Index() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => navigate("/messages")}
-              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="w-8 h-8 rounded-[10px] bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <MessageCircle size={16} />
+              <MessageCircle size={14} />
             </button>
             <button
               onClick={() => navigate("/discover")}
-              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="w-8 h-8 rounded-[10px] bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Search size={16} />
+              <Search size={14} />
             </button>
             <button
               onClick={() => navigate("/notifications")}
-              className="relative w-9 h-9 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="relative w-8 h-8 rounded-[10px] bg-accent border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Bell size={16} />
+              <Bell size={14} />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
-                  <span className="text-[8px] font-bold text-destructive-foreground">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                <span className="absolute -top-0.5 -right-0.5 min-w-[13px] h-[13px] bg-destructive rounded-full flex items-center justify-center border-[1.5px] border-background">
+                  <span className="text-[7px] font-bold text-destructive-foreground">{unreadCount > 9 ? "9+" : unreadCount}</span>
                 </span>
               )}
             </button>
