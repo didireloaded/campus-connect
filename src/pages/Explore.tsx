@@ -142,8 +142,6 @@ export default function Explore() {
     </div>
   );
 }
-  Calendar, Home, Box
-} from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const GRID_ITEMS = [
