@@ -142,7 +142,6 @@ export default function Explore() {
     </div>
   );
 }
-  Briefcase, Users, MapPin, Eye, Flame, Search, Newspaper, MessageCircle,
   Calendar, Home, Box
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
