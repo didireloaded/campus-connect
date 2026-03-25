@@ -127,8 +127,16 @@ export function useStories() {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + durationHours);
 
+    // Get user's university_id from profile
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('university_id')
+      .eq('id', profile.id)
+      .single();
+
     const { error } = await supabase.from('stories').insert({
       user_id: profile.id,
+      university_id: userProfile?.university_id || '',
       media_url: publicUrl,
       media_type: file.type.startsWith('video') ? 'video' : 'image',
       caption: caption || null,
