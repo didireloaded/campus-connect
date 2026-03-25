@@ -351,8 +351,6 @@ export default function Auth() {
     </div>
   );
 }
-import { useAuth } from "@/contexts/AuthContext";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, Camera, Loader2, GraduationCap } from "lucide-react";

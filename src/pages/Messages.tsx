@@ -172,7 +172,6 @@ export default function Messages() {
     </div>
   );
 }
-import { ArrowLeft, Send, Loader2, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";

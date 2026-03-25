@@ -142,7 +142,6 @@ export default function Explore() {
     </div>
   );
 }
-import { Input } from "@/components/ui/input";
 
 const GRID_ITEMS = [
   { label: "Events", subtitle: "What's happening", icon: Calendar, path: "/events", featured: true },

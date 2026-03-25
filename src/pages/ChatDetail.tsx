@@ -211,7 +211,6 @@ function groupMessagesByDate(messages: any[]) {
 
   return groups;
 }
-import { formatDistanceToNow } from "date-fns";
 
 interface Message {
   id: string;
