@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { postService } from "@/services/postService";
 import { notificationService } from "@/services/notificationService";
+import { savedPostsService } from "@/services/savedPostsService";
 import {
   MessageCircle, Share2, MoreHorizontal,
   Send, X, Trash2, Flag, Bookmark, CheckCheck, Loader2
@@ -36,29 +37,25 @@ interface Comment {
   id: string;
   content: string;
   created_at: string;
+  parent_comment_id: string | null;
+  user_id: string;
   profiles: { username: string; avatar_url: string | null };
 }
 
 // ─── Comment Sheet ────────────────────────────────────────────────────────────
 
 function CommentSheet({
-  postId,
-  open,
-  onClose,
-  commentsCount,
-  onCommentPosted,
+  postId, open, onClose, commentsCount, onCommentPosted, postOwnerId,
 }: {
-  postId: string;
-  open: boolean;
-  onClose: () => void;
-  commentsCount: number;
-  onCommentPosted: () => void;
+  postId: string; open: boolean; onClose: () => void;
+  commentsCount: number; onCommentPosted: () => void; postOwnerId?: string;
 }) {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
   const [posting, setPosting] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ id: string; username: string } | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -76,11 +73,30 @@ function CommentSheet({
     if (!text.trim() || !user || posting) return;
     setPosting(true);
     try {
-      await postService.createComment(postId, user.id, text.trim());
+      const insertData: any = {
+        post_id: postId,
+        user_id: user.id,
+        content: text.trim(),
+      };
+      if (replyTo) insertData.parent_comment_id = replyTo.id;
+      
+      await supabase.from("comments").insert(insertData);
       setText("");
+      setReplyTo(null);
       const fresh = await postService.fetchComments(postId);
       setComments(fresh as unknown as Comment[]);
       onCommentPosted();
+
+      // Send notification to post owner
+      if (postOwnerId && postOwnerId !== user.id) {
+        notificationService.createNotification({
+          userId: postOwnerId,
+          actorId: user.id,
+          type: "comment",
+          referenceId: postId,
+        }).catch(() => {});
+      }
+
       setTimeout(() => listRef.current?.scrollTo({ top: 99999, behavior: "smooth" }), 50);
     } catch {
       toast.error("Failed to post reply");
@@ -88,6 +104,9 @@ function CommentSheet({
       setPosting(false);
     }
   };
+
+  const topLevel = comments.filter(c => !c.parent_comment_id);
+  const getReplies = (parentId: string) => comments.filter(c => c.parent_comment_id === parentId);
 
   return (
     <AnimatePresence>
@@ -119,47 +138,85 @@ function CommentSheet({
               ) : comments.length === 0 ? (
                 <p className="text-center text-xs text-muted-foreground py-8">No replies yet. Start the conversation.</p>
               ) : (
-                comments.map((c) => (
-                  <div key={c.id} className="flex gap-2.5">
-                    <Avatar className="h-7 w-7 shrink-0">
-                      <AvatarImage src={c.profiles?.avatar_url || undefined} />
-                      <AvatarFallback className="bg-secondary text-secondary-foreground text-[10px] font-semibold">
-                        {c.profiles?.username?.[0]?.toUpperCase() || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-foreground">
-                        <span className="font-semibold mr-1">{c.profiles?.username}</span>
-                        {c.content}
-                      </p>
-                      <p className="text-[9px] text-muted-foreground mt-0.5">
-                        {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
-                      </p>
+                topLevel.map((c) => (
+                  <div key={c.id}>
+                    <div className="flex gap-2.5">
+                      <Avatar className="h-7 w-7 shrink-0">
+                        <AvatarImage src={c.profiles?.avatar_url || undefined} />
+                        <AvatarFallback className="bg-secondary text-secondary-foreground text-[10px] font-semibold">
+                          {c.profiles?.username?.[0]?.toUpperCase() || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-foreground">
+                          <span className="font-semibold mr-1">{c.profiles?.username}</span>
+                          {c.content}
+                        </p>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          <p className="text-[9px] text-muted-foreground">
+                            {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
+                          </p>
+                          <button
+                            onClick={() => setReplyTo({ id: c.id, username: c.profiles?.username })}
+                            className="text-[9px] text-primary font-semibold"
+                          >
+                            Reply
+                          </button>
+                        </div>
+                        {/* Nested replies */}
+                        {getReplies(c.id).map((r) => (
+                          <div key={r.id} className="flex gap-2 mt-2 ml-2">
+                            <Avatar className="h-5 w-5 shrink-0">
+                              <AvatarImage src={r.profiles?.avatar_url || undefined} />
+                              <AvatarFallback className="bg-secondary text-[8px]">
+                                {r.profiles?.username?.[0]?.toUpperCase() || "?"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-[11px] text-foreground">
+                                <span className="font-semibold mr-1">{r.profiles?.username}</span>
+                                {r.content}
+                              </p>
+                              <p className="text-[8px] text-muted-foreground mt-0.5">
+                                {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))
               )}
             </div>
-            <div className="flex items-end gap-2.5 px-4 py-2.5 border-t border-border shrink-0 pb-safe">
-              <textarea
-                ref={inputRef}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handlePost(); }
-                }}
-                placeholder="Write a reply…"
-                rows={1}
-                className="flex-1 bg-secondary rounded-xl px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground resize-none outline-none focus:ring-1 focus:ring-ring/30"
-                style={{ minHeight: 36, maxHeight: 100 }}
-              />
-              <button
-                onClick={handlePost}
-                disabled={!text.trim() || posting}
-                className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center disabled:opacity-40 transition-opacity shrink-0"
-              >
-                {posting ? <Loader2 size={13} className="animate-spin text-primary-foreground" /> : <Send size={13} className="text-primary-foreground" />}
-              </button>
+            <div className="px-4 py-2.5 border-t border-border shrink-0 pb-safe">
+              {replyTo && (
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[10px] text-muted-foreground">Replying to @{replyTo.username}</span>
+                  <button onClick={() => setReplyTo(null)}><X size={10} className="text-muted-foreground" /></button>
+                </div>
+              )}
+              <div className="flex items-end gap-2.5">
+                <textarea
+                  ref={inputRef}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handlePost(); }
+                  }}
+                  placeholder={replyTo ? `Reply to @${replyTo.username}…` : "Write a reply…"}
+                  rows={1}
+                  className="flex-1 bg-secondary rounded-xl px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground resize-none outline-none focus:ring-1 focus:ring-ring/30"
+                  style={{ minHeight: 36, maxHeight: 100 }}
+                />
+                <button
+                  onClick={handlePost}
+                  disabled={!text.trim() || posting}
+                  className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center disabled:opacity-40 transition-opacity shrink-0"
+                >
+                  {posting ? <Loader2 size={13} className="animate-spin text-primary-foreground" /> : <Send size={13} className="text-primary-foreground" />}
+                </button>
+              </div>
             </div>
           </motion.div>
         </>
@@ -227,6 +284,7 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
   useEffect(() => {
     if (!user) return;
     postService.isLiked(post.id, user.id).then(setLiked);
+    savedPostsService.isSaved(user.id, post.id).then(setSaved);
   }, [post.id, user]);
 
   const handleLike = async () => {
@@ -248,6 +306,24 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
     } catch {
       setLiked(wasLiked);
       setLikesCount((c) => wasLiked ? c + 1 : Math.max(0, c - 1));
+      toast.error("Failed");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    const wasSaved = saved;
+    setSaved(!wasSaved);
+    try {
+      if (wasSaved) {
+        await savedPostsService.unsavePost(user.id, post.id);
+        toast.success("Removed from saved");
+      } else {
+        await savedPostsService.savePost(user.id, post.id, "post");
+        toast.success("Post saved");
+      }
+    } catch {
+      setSaved(wasSaved);
       toast.error("Failed");
     }
   };
@@ -355,7 +431,7 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
           </div>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => { setSaved(!saved); toast.success(saved ? "Removed" : "Saved"); }}
+              onClick={handleSave}
               className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
             >
               <Bookmark size={15} className={saved ? "fill-foreground text-foreground" : ""} />
@@ -373,6 +449,7 @@ export const PostCard = ({ post, onUpdate }: PostCardProps) => {
         onClose={() => setShowComments(false)}
         commentsCount={commentsCount}
         onCommentPosted={() => { setCommentsCount((c) => c + 1); onUpdate?.(); }}
+        postOwnerId={post.user_id}
       />
     </>
   );

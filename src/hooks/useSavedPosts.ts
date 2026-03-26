@@ -21,8 +21,12 @@ export const useSavedPosts = () => {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  const isSaved = useCallback((postId: string) => {
+    return saved.some((s) => s.post_id === postId);
+  }, [saved]);
+
   const toggleSave = useCallback(async (postId: string, postType: string) => {
-    if (!user) return;
+    if (!user) return false;
     const alreadySaved = saved.some((s) => s.post_id === postId);
     if (alreadySaved) {
       await savedPostsService.unsavePost(user.id, postId);
@@ -30,12 +34,8 @@ export const useSavedPosts = () => {
       await savedPostsService.savePost(user.id, postId, postType);
     }
     refresh();
-    return !isSaved;
+    return !alreadySaved;
   }, [user, saved, refresh]);
-
-  const isSaved = useCallback((postId: string) => {
-    return saved.some((s) => s.post_id === postId);
-  }, [saved]);
 
   return { saved, loading, refresh, toggleSave, isSaved };
 };

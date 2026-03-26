@@ -23,10 +23,12 @@ export interface EventWithCreator extends EventRow {
 
 export const eventService = {
   async fetchEvents(limit = 50) {
+    // Fetch both upcoming and recent past events (last 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const { data, error } = await supabase
       .from("events")
       .select("*, profiles(username, avatar_url)")
-      .gt("event_date", new Date().toISOString())
+      .gte("event_date", thirtyDaysAgo)
       .order("event_date", { ascending: true })
       .limit(limit);
     if (error) throw error;
