@@ -34,12 +34,15 @@ export default function LectureNotes() {
   const [activeCourse, setActiveCourse] = useState("all");
 
   const fetchNotes = async () => {
-    const { data } = await supabase.from("lecture_notes").select("*").order("created_at", { ascending: false });
+    if (!profile?.university_id) return;
+    const { data } = await supabase.from("lecture_notes").select("*")
+      .eq("university_id", profile.university_id)
+      .order("created_at", { ascending: false });
     setNotes((data as Note[]) || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchNotes(); }, []);
+  useEffect(() => { fetchNotes(); }, [profile?.university_id]);
 
   const handleUpload = async () => {
     if (!title.trim() || !file || !profile?.university_id) return;

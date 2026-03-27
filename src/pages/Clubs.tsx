@@ -51,18 +51,26 @@ export default function Clubs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
-  const fetchClubs = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    const [clubsRes, membersRes] = await Promise.all([
-      supabase.from("clubs").select("*").order("members_count", { ascending: false }),
-      user ? supabase.from("club_members").select("club_id").eq("user_id", user.id) : Promise.resolve({ data: [] }),
-    ]);
-    setClubs((clubsRes.data as Club[]) || []);
-    setMyMemberships((membersRes.data || []).map((m: any) => m.club_id));
-    setLoading(false);
-  };
+  useEffect(() => {
+    if (!profile?.university_id) return;
 
-  useEffect(() => { fetchClubs(); }, []);
+    const fetchData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const [clubsRes, membersRes] = await Promise.all([
+        supabase.from("clubs").select("*")
+          .eq("university_id", profile.university_id)
+          .order("members_count", { ascending: false }),
+        user
+          ? supabase.from("club_members").select("club_id").eq("user_id", user.id)
+          : Promise.resolve({ data: [] }),
+      ]);
+      setClubs((clubsRes.data as Club[]) || []);
+      setMyMemberships((membersRes.data || []).map((m: any) => m.club_id));
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [profile?.university_id]);
 
   const handleCreate = async () => {
     if (!name.trim() || !profile?.university_id) return;
@@ -76,21 +84,35 @@ export default function Clubs() {
     if (club) await supabase.from("club_members").insert({ club_id: club.id, user_id: user.id } as any);
     toast.success("Club created!");
     setSheetOpen(false); setName(""); setCategory(""); setDescription("");
-    fetchClubs();
+    // Refresh clubs list
+    const { data: refreshed } = await supabase.from("clubs").select("*")
+      .eq("university_id", profile.university_id)
+      .order("members_count", { ascending: false });
+    setClubs((refreshed as Club[]) || []);
   };
 
   const toggleJoin = async (clubId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { toast.error("Please log in"); return; }
     const isMember = myMemberships.includes(clubId);
-    if (isMember) {
-      await supabase.from("club_members").delete().eq("club_id", clubId).eq("user_id", user.id);
-      toast.success("Left club");
-    } else {
-      await supabase.from("club_members").insert({ club_id: clubId, user_id: user.id } as any);
-      toast.success("Joined club!");
+    try {
+      if (isMember) {
+        await supabase.from("club_members").delete().eq("club_id", clubId).eq("user_id", user.id);
+        setMyMemberships(prev => prev.filter(id => id !== clubId));
+        toast.success("Left club");
+      } else {
+        await supabase.from("club_members").insert({ club_id: clubId, user_id: user.id } as any);
+        setMyMemberships(prev => [...prev, clubId]);
+        toast.success("Joined club! 🎉");
+      }
+      // Refresh member count from trigger
+      const { data: club } = await supabase.from("clubs").select("members_count").eq("id", clubId).single();
+      if (club) {
+        setClubs(prev => prev.map(c => c.id === clubId ? { ...c, members_count: club.members_count } : c));
+      }
+    } catch {
+      toast.error("Failed to update membership");
     }
-    fetchClubs();
   };
 
   const allCategories = ["All", "Academic", "Sports", "Arts", "Tech", "Social", "Religious"];

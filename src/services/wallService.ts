@@ -27,10 +27,23 @@ export const generateAlias = () => {
 
 export const wallService = {
   async fetchPosts(limit = 30) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("university_id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile?.university_id) return [];
+
     const { data, error } = await supabase
       .from("wall_posts")
       .select("*")
+      .eq("university_id", profile.university_id)
       .eq("moderation_status", "approved")
+      .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false })
       .limit(limit);
     if (error) throw error;
@@ -39,10 +52,12 @@ export const wallService = {
 
   async createPost(universityId: string, content: string) {
     const alias = generateAlias();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     const { data: post, error } = await supabase.from("wall_posts").insert({
       university_id: universityId,
       content,
       alias,
+      expires_at: expiresAt,
     } as any).select("id").single();
     if (error) throw error;
 
