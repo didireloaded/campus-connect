@@ -51,18 +51,26 @@ export default function Clubs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
-  const fetchClubs = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    const [clubsRes, membersRes] = await Promise.all([
-      supabase.from("clubs").select("*").order("members_count", { ascending: false }),
-      user ? supabase.from("club_members").select("club_id").eq("user_id", user.id) : Promise.resolve({ data: [] }),
-    ]);
-    setClubs((clubsRes.data as Club[]) || []);
-    setMyMemberships((membersRes.data || []).map((m: any) => m.club_id));
-    setLoading(false);
-  };
+  useEffect(() => {
+    if (!profile?.university_id) return;
 
-  useEffect(() => { fetchClubs(); }, []);
+    const fetchData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const [clubsRes, membersRes] = await Promise.all([
+        supabase.from("clubs").select("*")
+          .eq("university_id", profile.university_id)
+          .order("members_count", { ascending: false }),
+        user
+          ? supabase.from("club_members").select("club_id").eq("user_id", user.id)
+          : Promise.resolve({ data: [] }),
+      ]);
+      setClubs((clubsRes.data as Club[]) || []);
+      setMyMemberships((membersRes.data || []).map((m: any) => m.club_id));
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [profile?.university_id]);
 
   const handleCreate = async () => {
     if (!name.trim() || !profile?.university_id) return;
