@@ -84,7 +84,11 @@ export default function Clubs() {
     if (club) await supabase.from("club_members").insert({ club_id: club.id, user_id: user.id } as any);
     toast.success("Club created!");
     setSheetOpen(false); setName(""); setCategory(""); setDescription("");
-    fetchClubs();
+    // Refresh clubs list
+    const { data: refreshed } = await supabase.from("clubs").select("*")
+      .eq("university_id", profile.university_id)
+      .order("members_count", { ascending: false });
+    setClubs((refreshed as Club[]) || []);
   };
 
   const toggleJoin = async (clubId: string) => {
