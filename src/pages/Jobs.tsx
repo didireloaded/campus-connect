@@ -45,14 +45,30 @@ export default function Jobs() {
   const [pay, setPay] = useState("");
   const [contact, setContact] = useState("");
 
-  const fetchJobs = async () => {
-    const { data } = await supabase.from("jobs").select("*")
-      .eq("status", "open").order("created_at", { ascending: false });
-    setJobs((data as Job[]) || []);
-    setLoading(false);
-  };
+  useEffect(() => {
+    if (!profile?.university_id) return;
 
-  useEffect(() => { fetchJobs(); }, []);
+    const fetchJobs = async () => {
+      const { data } = await supabase.from("jobs").select("*")
+        .eq("university_id", profile.university_id)
+        .eq("status", "open")
+        .order("created_at", { ascending: false });
+      setJobs((data as Job[]) || []);
+      setLoading(false);
+    };
+
+    fetchJobs();
+
+    const channel = supabase
+      .channel("jobs-realtime")
+      .on("postgres_changes", {
+        event: "*", schema: "public", table: "jobs",
+        filter: `university_id=eq.${profile.university_id}`,
+      }, () => fetchJobs())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [profile?.university_id]);
 
   const handleCreate = async () => {
     if (!title.trim() || !profile?.university_id) return;
