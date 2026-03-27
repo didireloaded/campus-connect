@@ -33,26 +33,33 @@ export default function Polls() {
   const [options, setOptions] = useState(["", ""]);
 
   const fetchPolls = async () => {
+    if (!profile?.university_id) return;
     const { data: { user } } = await supabase.auth.getUser();
     const { data: pollsData } = await supabase.from("polls").select("*")
+      .eq("university_id", profile.university_id)
       .gte("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false });
 
     if (!pollsData) { setLoading(false); return; }
 
-    const enriched: PollWithVotes[] = [];
-    for (const p of pollsData as any[]) {
-      const opts = (p.options as string[]) || [];
-      const { data: votes } = await supabase.from("poll_votes").select("option_index, user_id").eq("poll_id", p.id);
-      const voteCounts = opts.map((_: string, i: number) => (votes || []).filter((v: any) => v.option_index === i).length);
-      const myVote = user ? (votes || []).find((v: any) => v.user_id === user.id)?.option_index ?? null : null;
-      enriched.push({ ...p, options: opts, voteCounts, myVote } as any);
-    }
-    setPolls(enriched);
+    const enriched = await Promise.all(
+      (pollsData as any[]).map(async (p) => {
+        const opts = (p.options as string[]) || [];
+        const { data: votes } = await supabase.from("poll_votes").select("option_index, user_id").eq("poll_id", p.id);
+        const voteCounts = opts.map((_: string, i: number) => (votes || []).filter((v: any) => v.option_index === i).length);
+        let myVote: number | null = null;
+        if (user) {
+          const found = (votes || []).find((v: any) => v.user_id === user.id);
+          if (found) myVote = found.option_index;
+        }
+        return { ...p, options: opts, voteCounts, myVote };
+      })
+    );
+    setPolls(enriched as any[]);
     setLoading(false);
   };
 
-  useEffect(() => { fetchPolls(); }, []);
+  useEffect(() => { fetchPolls(); }, [profile?.university_id]);
 
   const handleCreate = async () => {
     const validOpts = options.filter((o) => o.trim());
