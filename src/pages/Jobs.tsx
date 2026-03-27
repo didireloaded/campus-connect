@@ -85,7 +85,6 @@ export default function Jobs() {
     toast.success("Job posted!");
     setSheetOpen(false);
     setTitle(""); setCompany(""); setDescription(""); setLocation(""); setPay(""); setContact("");
-    fetchJobs();
   };
 
   const typeLabels: Record<string, string> = {

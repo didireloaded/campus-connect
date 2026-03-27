@@ -78,13 +78,24 @@ export default function Polls() {
 
   const handleVote = async (pollId: string, optionIndex: number) => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { error } = await supabase.from("poll_votes").insert({
-      poll_id: pollId, user_id: user.id, option_index: optionIndex,
-    } as any);
-    if (error?.code === "23505") { toast.error("Already voted!"); return; }
-    if (error) { toast.error(error.message); return; }
-    fetchPolls();
+    if (!user) { toast.error("Please log in to vote"); return; }
+    const poll = polls.find(p => p.id === pollId);
+    if (poll?.myVote !== null && poll?.myVote !== undefined) { toast.error("You've already voted on this poll"); return; }
+    try {
+      const { error } = await supabase.from("poll_votes").insert({
+        poll_id: pollId, user_id: user.id, option_index: optionIndex,
+      } as any);
+      if (error) throw error;
+      // Optimistic update
+      setPolls(prev => prev.map(p => {
+        if (p.id !== pollId) return p;
+        const newCounts = [...p.voteCounts];
+        newCounts[optionIndex] = (newCounts[optionIndex] || 0) + 1;
+        return { ...p, voteCounts: newCounts, myVote: optionIndex };
+      }));
+    } catch {
+      toast.error("Failed to vote");
+    }
   };
 
   return (

@@ -52,10 +52,12 @@ export const wallService = {
 
   async createPost(universityId: string, content: string) {
     const alias = generateAlias();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     const { data: post, error } = await supabase.from("wall_posts").insert({
       university_id: universityId,
       content,
       alias,
+      expires_at: expiresAt,
     } as any).select("id").single();
     if (error) throw error;
 
