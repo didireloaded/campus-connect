@@ -195,6 +195,28 @@ export default function Index() {
           </DashboardSection>
         )}
 
+        {/* Quick Actions — always visible */}
+        <DashboardSection title="Quick Actions" icon={<Zap size={14} />}>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { label: "Events", icon: <CalendarDays size={18} />, path: "/events" },
+              { label: "Market", icon: <Search size={18} />, path: "/marketplace" },
+              { label: "Groups", icon: <MessageCircle size={18} />, path: "/study-groups" },
+              { label: "Wall", icon: <TrendingUp size={18} />, path: "/wall" },
+            ].map((item) => (
+              <motion.button
+                key={item.label}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(item.path)}
+                className="flex flex-col items-center gap-1.5 py-3 bg-card rounded-xl border border-border hover:border-primary/30 transition-colors"
+              >
+                <div className="text-primary">{item.icon}</div>
+                <span className="text-[10px] font-semibold text-muted-foreground">{item.label}</span>
+              </motion.button>
+            ))}
+          </div>
+        </DashboardSection>
+
         {/* Recent Activity */}
         <DashboardSection
           title="Recent Activity"
@@ -205,12 +227,20 @@ export default function Index() {
               <Loader2 className="animate-spin text-muted-foreground" size={22} />
             </div>
           ) : recentPosts.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-xl border border-border">
-              <p className="text-3xl mb-2">📋</p>
+            <div className="text-center py-16 bg-card rounded-xl border border-border">
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Zap size={24} className="text-primary" />
+              </div>
               <h3 className="text-sm font-semibold text-foreground">No activity yet</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Be the first to share something on campus
+              <p className="text-xs text-muted-foreground mt-1 max-w-[200px] mx-auto">
+                Be the first to share something on your campus!
               </p>
+              <button
+                onClick={() => navigate("/discover")}
+                className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-lg"
+              >
+                Explore Campus
+              </button>
             </div>
           ) : (
             <div className="space-y-3">
