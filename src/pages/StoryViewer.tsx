@@ -1,17 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useStories, Story } from "@/hooks/useStories";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Eye, ChevronLeft, ChevronRight } from "lucide-react";
-
-interface Story {
-  id: string;
-  media_url: string;
-  created_at: string;
-  view_count: number;
-  user_id: string;
-  profiles?: { username: string; avatar_url: string | null };
-}
+import { X, Heart, Eye, Trash2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const STORY_DURATION = 5000;
 
@@ -19,23 +12,26 @@ export default function StoryViewer() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const userId = searchParams.get("userId");
-  const [stories, setStories] = useState<Story[]>([]);
+  const { user } = useAuth();
+  const { storyGroups, markViewed, deleteStory } = useStories();
+
+  const group = storyGroups.find((g) => g.user_id === userId);
+  const stories = group?.stories || [];
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [liked, setLiked] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
 
+  const story = stories[currentIndex] as Story | undefined;
+  const isOwn = userId === user?.id;
+
+  // Mark viewed on each story change
   useEffect(() => {
-    if (!userId) return;
-    supabase
-      .from("stories")
-      .select("*, profiles(username, avatar_url)")
-      .eq("user_id", userId)
-      .gte("expires_at", new Date().toISOString())
-      .order("created_at", { ascending: true })
-      .then(({ data }) => setStories((data as any[]) || []));
-  }, [userId]);
-
-  const story = stories[currentIndex];
+    if (story && !story.viewed && !isOwn) {
+      markViewed(story.id);
+    }
+  }, [story?.id]);
 
   const goNext = useCallback(() => {
     if (currentIndex < stories.length - 1) {
@@ -57,18 +53,20 @@ export default function StoryViewer() {
 
   // Auto-advance timer
   useEffect(() => {
-    if (!story) return;
+    if (!story || paused) return;
     setProgress(0);
     const interval = setInterval(() => {
       setProgress((p) => {
-        if (p >= 100) { goNext(); return 0; }
-        return p + (100 / (STORY_DURATION / 50));
+        if (p >= 100) {
+          goNext();
+          return 0;
+        }
+        return p + 100 / (STORY_DURATION / 50);
       });
     }, 50);
     return () => clearInterval(interval);
-  }, [currentIndex, story, goNext]);
+  }, [currentIndex, story, goNext, paused]);
 
-  // Tap zones
   const handleTap = (e: React.MouseEvent) => {
     const x = e.clientX;
     const width = window.innerWidth;
@@ -76,19 +74,32 @@ export default function StoryViewer() {
     else goNext();
   };
 
-  if (!story) {
+  const handleDelete = async () => {
+    if (!story) return;
+    try {
+      await deleteStory(story.id);
+      toast.success("Story deleted");
+      if (stories.length <= 1) navigate(-1);
+      else setCurrentIndex((i) => Math.min(i, stories.length - 2));
+    } catch {
+      toast.error("Failed to delete");
+    }
+  };
+
+  if (!group || stories.length === 0) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-        <button onClick={() => navigate(-1)} className="text-white">
-          <X size={32} />
-        </button>
+      <div className="fixed inset-0 bg-background flex items-center justify-center z-50">
+        <div className="text-center space-y-3">
+          <p className="text-muted-foreground">No stories to show</p>
+          <button onClick={() => navigate(-1)} className="text-primary text-sm font-medium">Go back</button>
+        </div>
       </div>
     );
   }
 
-  const username = (story as any).profiles?.username || "Unknown";
-  const avatar = (story as any).profiles?.avatar_url;
-  const timeAgo = getTimeAgo(story.created_at);
+  const username = story?.profile?.username || "Unknown";
+  const avatar = story?.profile?.avatar_url;
+  const timeAgo = story ? getTimeAgo(story.created_at) : "";
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col max-w-lg mx-auto">
@@ -119,35 +130,80 @@ export default function StoryViewer() {
           <span className="text-white text-sm font-semibold">{username}</span>
           <span className="text-white/60 text-xs">{timeAgo}</span>
         </div>
-        <button onClick={() => navigate(-1)}>
-          <X size={24} className="text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          {isOwn && (
+            <button onClick={handleDelete}>
+              <Trash2 size={20} className="text-white/70 hover:text-red-400" />
+            </button>
+          )}
+          <button onClick={() => navigate(-1)}>
+            <X size={24} className="text-white" />
+          </button>
+        </div>
       </div>
 
-      {/* Story image */}
-      <div className="flex-1 relative" onClick={handleTap}>
+      {/* Story media */}
+      <div
+        className="flex-1 relative"
+        onClick={handleTap}
+        onMouseDown={() => setPaused(true)}
+        onMouseUp={() => setPaused(false)}
+        onTouchStart={() => setPaused(true)}
+        onTouchEnd={() => setPaused(false)}
+      >
         <AnimatePresence mode="wait">
-          <motion.img
-            key={story.id}
-            src={story.media_url}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+          {story && (
+            story.media_type === "video" ? (
+              <motion.video
+                key={story.id}
+                src={story.media_url}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 w-full h-full object-contain"
+                style={{ backgroundColor: story.bg_color || "#111" }}
+                autoPlay
+                muted
+                playsInline
+              />
+            ) : (
+              <motion.img
+                key={story.id}
+                src={story.media_url}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 w-full h-full object-contain"
+                style={{ backgroundColor: story.bg_color || "#111" }}
+              />
+            )
+          )}
         </AnimatePresence>
+
+        {/* Caption overlay */}
+        {story?.caption && (
+          <div className="absolute bottom-16 left-0 right-0 z-10 px-6 text-center">
+            <p className="text-white text-sm bg-black/40 backdrop-blur-sm rounded-lg px-3 py-2 inline-block">
+              {story.caption}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Bottom bar */}
       <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between px-5 pb-8">
         <div className="flex items-center gap-1.5 text-white/70">
           <Eye size={16} />
-          <span className="text-sm">{story.view_count || 0}</span>
+          <span className="text-sm">{story?.view_count || 0}</span>
         </div>
         <motion.button
           whileTap={{ scale: 1.3 }}
-          onClick={(e) => { e.stopPropagation(); setLiked(!liked); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setLiked(!liked);
+          }}
         >
           <Heart size={24} className={liked ? "text-red-500 fill-red-500" : "text-white"} />
         </motion.button>
