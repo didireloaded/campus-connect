@@ -52,17 +52,28 @@ export default function StoryViewer() {
       setProgress(0);
       setLiked(false);
     } else {
-      navigate(-1);
+      // Move to next user's stories (Instagram-style)
+      goToGroup(groupIndex + 1);
     }
-  }, [currentIndex, stories.length, navigate]);
+  }, [currentIndex, stories.length, goToGroup, groupIndex]);
 
   const goPrev = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex((i) => i - 1);
       setProgress(0);
       setLiked(false);
+    } else if (groupIndex > 0) {
+      // Go to previous user's last story
+      const prev = storyGroups[groupIndex - 1];
+      if (prev) {
+        const lastIdx = Math.max(prev.stories.length - 1, 0);
+        navigate(`/story?userId=${prev.user_id}`, { replace: true });
+        setCurrentIndex(lastIdx);
+        setProgress(0);
+        setLiked(false);
+      }
     }
-  }, [currentIndex]);
+  }, [currentIndex, groupIndex, storyGroups, navigate]);
 
   // Auto-advance timer
   useEffect(() => {
