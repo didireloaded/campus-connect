@@ -169,7 +169,15 @@ export function useStories() {
       expires_at: expiresAt.toISOString(),
     });
 
-    if (error) throw error;
+    if (error) {
+      const isCampusRls = /row-level security|university/i.test(error.message || '');
+      toast.error(
+        isCampusRls
+          ? 'Your campus is not set. Update your profile and try again.'
+          : error.message || 'Failed to post story.'
+      );
+      throw error;
+    }
     toast.success('Story posted!');
     await fetchStories();
   };
