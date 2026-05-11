@@ -15,7 +15,8 @@ export default function StoryViewer() {
   const { user } = useAuth();
   const { storyGroups, markViewed, deleteStory } = useStories();
 
-  const group = storyGroups.find((g) => g.user_id === userId);
+  const groupIndex = storyGroups.findIndex((g) => g.user_id === userId);
+  const group = groupIndex >= 0 ? storyGroups[groupIndex] : undefined;
   const stories = group?.stories || [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,6 +26,18 @@ export default function StoryViewer() {
 
   const story = stories[currentIndex] as Story | undefined;
   const isOwn = userId === user?.id;
+
+  const goToGroup = useCallback((idx: number) => {
+    const g = storyGroups[idx];
+    if (!g) {
+      navigate(-1);
+      return;
+    }
+    setCurrentIndex(0);
+    setProgress(0);
+    setLiked(false);
+    navigate(`/story?userId=${g.user_id}`, { replace: true });
+  }, [storyGroups, navigate]);
 
   // Mark viewed on each story change
   useEffect(() => {
@@ -39,17 +52,28 @@ export default function StoryViewer() {
       setProgress(0);
       setLiked(false);
     } else {
-      navigate(-1);
+      // Move to next user's stories (Instagram-style)
+      goToGroup(groupIndex + 1);
     }
-  }, [currentIndex, stories.length, navigate]);
+  }, [currentIndex, stories.length, goToGroup, groupIndex]);
 
   const goPrev = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex((i) => i - 1);
       setProgress(0);
       setLiked(false);
+    } else if (groupIndex > 0) {
+      // Go to previous user's last story
+      const prev = storyGroups[groupIndex - 1];
+      if (prev) {
+        const lastIdx = Math.max(prev.stories.length - 1, 0);
+        navigate(`/story?userId=${prev.user_id}`, { replace: true });
+        setCurrentIndex(lastIdx);
+        setProgress(0);
+        setLiked(false);
+      }
     }
-  }, [currentIndex]);
+  }, [currentIndex, groupIndex, storyGroups, navigate]);
 
   // Auto-advance timer
   useEffect(() => {

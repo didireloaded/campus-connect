@@ -1,10 +1,9 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Image, Loader2, AlertTriangle } from "lucide-react";
+import { Camera, Image, Loader2 } from "lucide-react";
 import { useStories } from "@/hooks/useStories";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -18,15 +17,18 @@ const BG_COLORS = ["#111111", "#1a1a2e", "#16213e", "#0f3460", "#533483", "#e945
 
 export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) {
   const { uploadStory } = useStories();
-  const { profile } = useAuth();
-  const navigate = useNavigate();
-  const hasUniversity = !!profile?.university_id;
+  const { refreshProfile } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
   const [bgColor, setBgColor] = useState("#111111");
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Refresh profile each time the composer opens so we have the latest university_id
+  useEffect(() => {
+    if (open) refreshProfile();
+  }, [open]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -40,10 +42,6 @@ export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) 
   };
 
   const handleSubmit = async () => {
-    if (!hasUniversity) {
-      toast.error("Set your campus in your profile before posting a story.");
-      return;
-    }
     if (!file) {
       toast.error("Select an image or video");
       return;
@@ -69,35 +67,12 @@ export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) 
           <SheetTitle className="text-foreground">New Story</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-4">
-          {!hasUniversity && (
-            <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
-              <AlertTriangle size={18} className="text-destructive mt-0.5 shrink-0" />
-              <div className="flex-1">
-                <p className="text-foreground font-medium">Pick your campus first</p>
-                <p className="text-muted-foreground text-xs mt-0.5">
-                  Stories are scoped to your university. Add it in your profile to post.
-                </p>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="px-0 h-auto mt-1 text-primary"
-                  onClick={() => {
-                    onOpenChange(false);
-                    navigate("/profile");
-                  }}
-                >
-                  Go to profile →
-                </Button>
-              </div>
-            </div>
-          )}
           <input
             ref={inputRef}
             type="file"
             accept="image/*,video/*"
             className="hidden"
             onChange={handleFileChange}
-            disabled={!hasUniversity}
           />
 
           {preview ? (
@@ -149,7 +124,7 @@ export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) 
             </div>
           </div>
 
-          <Button onClick={handleSubmit} disabled={loading || !file || !hasUniversity} className="w-full bg-primary text-primary-foreground">
+          <Button onClick={handleSubmit} disabled={loading || !file} className="w-full bg-primary text-primary-foreground">
             {loading ? <Loader2 className="animate-spin mr-2" size={16} /> : null}
             Post Story
           </Button>
