@@ -69,12 +69,35 @@ export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) 
           <SheetTitle className="text-foreground">New Story</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-4">
+          {!hasUniversity && (
+            <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
+              <AlertTriangle size={18} className="text-destructive mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-foreground font-medium">Pick your campus first</p>
+                <p className="text-muted-foreground text-xs mt-0.5">
+                  Stories are scoped to your university. Add it in your profile to post.
+                </p>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="px-0 h-auto mt-1 text-primary"
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate("/profile");
+                  }}
+                >
+                  Go to profile →
+                </Button>
+              </div>
+            </div>
+          )}
           <input
             ref={inputRef}
             type="file"
             accept="image/*,video/*"
             className="hidden"
             onChange={handleFileChange}
+            disabled={!hasUniversity}
           />
 
           {preview ? (
