@@ -53,12 +53,22 @@ export function useStories() {
 
       const grouped = new Map<string, StoryGroup>();
       for (const s of ((data as any[]) || [])) {
-        const viewed = (s.story_views || []).some((v: any) => v.viewer_id === profile.id);
-        const story: Story = { ...s, viewed, story_views: undefined };
+        // Defensive: skip malformed rows or stories that escape university scoping
+        if (!s || !s.user_id || !s.media_url) continue;
+        if (!s.university_id || s.university_id !== profile.university_id) continue;
+
+        const viewed = (s.story_views || []).some((v: any) => v?.viewer_id === profile.id);
+        const safeProfile = s.profile || {
+          id: s.user_id,
+          username: 'user',
+          full_name: '',
+          avatar_url: undefined,
+        };
+        const story: Story = { ...s, profile: safeProfile, viewed, story_views: undefined };
         if (!grouped.has(s.user_id)) {
           grouped.set(s.user_id, {
             user_id: s.user_id,
-            profile: s.profile,
+            profile: safeProfile,
             stories: [],
             hasUnviewed: false,
           });
@@ -112,7 +122,25 @@ export function useStories() {
     durationHours: number,
     bgColor: string
   ) => {
-    if (!profile?.id) return;
+    if (!profile?.id) {
+      const msg = 'You must be signed in to post a story.';
+      toast.error(msg);
+      throw new Error(msg);
+    }
+
+    // Verify university BEFORE uploading to storage to avoid orphaned files
+    const { data: userProfile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('university_id')
+      .eq('id', profile.id)
+      .single();
+
+    if (profileErr || !userProfile?.university_id) {
+      const msg = 'Select your campus in your profile before posting a story.';
+      toast.error(msg);
+      throw new Error(msg);
+    }
+
     const ext = file.name.split('.').pop() || 'jpg';
     const path = `${profile.id}/${Date.now()}.${ext}`;
 
@@ -120,23 +148,15 @@ export function useStories() {
       .from('stories')
       .upload(path, file, { contentType: file.type, upsert: false });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      toast.error(uploadError.message || 'Failed to upload media.');
+      throw uploadError;
+    }
 
     const { data: { publicUrl } } = supabase.storage.from('stories').getPublicUrl(path);
 
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + durationHours);
-
-    // Get user's university_id from profile
-    const { data: userProfile } = await supabase
-      .from('profiles')
-      .select('university_id')
-      .eq('id', profile.id)
-      .single();
-
-    if (!userProfile?.university_id) {
-      throw new Error('Join a campus before posting a story.');
-    }
 
     const { error } = await supabase.from('stories').insert({
       user_id: profile.id,
@@ -149,7 +169,15 @@ export function useStories() {
       expires_at: expiresAt.toISOString(),
     });
 
-    if (error) throw error;
+    if (error) {
+      const isCampusRls = /row-level security|university/i.test(error.message || '');
+      toast.error(
+        isCampusRls
+          ? 'Your campus is not set. Update your profile and try again.'
+          : error.message || 'Failed to post story.'
+      );
+      throw error;
+    }
     toast.success('Story posted!');
     await fetchStories();
   };
