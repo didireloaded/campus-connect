@@ -134,9 +134,13 @@ export function useStories() {
       .eq('id', profile.id)
       .single();
 
+    if (!userProfile?.university_id) {
+      throw new Error('Join a campus before posting a story.');
+    }
+
     const { error } = await supabase.from('stories').insert({
       user_id: profile.id,
-      university_id: userProfile?.university_id || '',
+      university_id: userProfile.university_id,
       media_url: publicUrl,
       media_type: file.type.startsWith('video') ? 'video' : 'image',
       caption: caption || null,
