@@ -167,7 +167,7 @@ export default function Index() {
                 <motion.button
                   key={ev.id}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate(`/events/${ev.id}`)}
+                  onClick={() => navigate(`/event-detail?id=${ev.id}`)}
                   className="w-full bg-card rounded-xl p-3.5 border border-border shadow-card flex items-start gap-3 text-left"
                 >
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
