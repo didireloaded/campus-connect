@@ -1,10 +1,12 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Image, Loader2 } from "lucide-react";
+import { Camera, Image, Loader2, AlertTriangle } from "lucide-react";
 import { useStories } from "@/hooks/useStories";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface CreateStorySheetProps {
