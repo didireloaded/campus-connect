@@ -18,6 +18,9 @@ const BG_COLORS = ["#111111", "#1a1a2e", "#16213e", "#0f3460", "#533483", "#e945
 
 export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) {
   const { uploadStory } = useStories();
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const hasUniversity = !!profile?.university_id;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
