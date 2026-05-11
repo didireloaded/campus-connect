@@ -40,6 +40,10 @@ export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) 
   };
 
   const handleSubmit = async () => {
+    if (!hasUniversity) {
+      toast.error("Set your campus in your profile before posting a story.");
+      return;
+    }
     if (!file) {
       toast.error("Select an image or video");
       return;
