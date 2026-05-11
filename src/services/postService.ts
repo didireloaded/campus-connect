@@ -22,22 +22,16 @@ export interface PostWithProfile extends PostRow {
 
 export const postService = {
   async fetchFeed(limit = 30) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("university_id")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (!profile?.university_id) return [];
+    // Resolve university via the SECURITY DEFINER helper — one round-trip
+    // instead of getUser + profiles lookup.
+    const { data: uniId } = await supabase.rpc("get_my_university_id");
+    if (!uniId) return [];
 
     // Fetch more than needed, score client-side, then slice
     const { data, error } = await supabase
       .from("posts")
       .select("*, profiles(username, avatar_url, full_name)")
-      .eq("university_id", profile.university_id)
+      .eq("university_id", uniId as unknown as string)
       .eq("moderation_status", "approved")
       .gte("created_at", new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString())
       .order("created_at", { ascending: false })

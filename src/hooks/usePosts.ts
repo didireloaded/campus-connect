@@ -55,21 +55,14 @@ export const usePosts = () => {
 
     const channel = supabase
       .channel(`feed-${universityId}`)
+      // posts.likes_count / comments_count are kept in sync by DB triggers,
+      // so a single subscription on the posts table catches everything
+      // without a flood of unrelated likes/comments events from other feeds.
       .on("postgres_changes", {
         event: "*",
         schema: "public",
         table: "posts",
         filter,
-      }, debouncedRefresh)
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "likes",
-      }, debouncedRefresh)
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "comments",
       }, debouncedRefresh)
       .subscribe();
 
