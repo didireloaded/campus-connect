@@ -35,6 +35,24 @@ export const notificationService = {
     if (error) throw error;
   },
 
+  async markRead(notificationId: string) {
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read: true } as any)
+      .eq("id", notificationId);
+    if (error) throw error;
+  },
+
+  async deleteNotification(notificationId: string) {
+    const { error } = await supabase.from("notifications").delete().eq("id", notificationId);
+    if (error) throw error;
+  },
+
+  async clearAll(userId: string) {
+    const { error } = await supabase.from("notifications").delete().eq("user_id", userId);
+    if (error) throw error;
+  },
+
   async getUnreadCount(userId: string) {
     const { count, error } = await supabase
       .from("notifications")
