@@ -32,6 +32,24 @@ export const useNotifications = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, [user]);
 
+  const markRead = useCallback(async (id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setUnreadCount((c) => Math.max(0, c - 1));
+    try { await notificationService.markRead(id); } catch (e) { console.error(e); }
+  }, []);
+
+  const dismiss = useCallback(async (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    try { await notificationService.deleteNotification(id); } catch (e) { console.error(e); refresh(); }
+  }, [refresh]);
+
+  const clearAll = useCallback(async () => {
+    if (!user) return;
+    setNotifications([]);
+    setUnreadCount(0);
+    try { await notificationService.clearAll(user.id); } catch (e) { console.error(e); refresh(); }
+  }, [user, refresh]);
+
   useEffect(() => {
     refresh();
     if (!user) return;
@@ -49,5 +67,5 @@ export const useNotifications = () => {
     return () => { supabase.removeChannel(channel); };
   }, [refresh, user]);
 
-  return { notifications, unreadCount, loading, refresh, markAllRead };
+  return { notifications, unreadCount, loading, refresh, markAllRead, markRead, dismiss, clearAll };
 };
