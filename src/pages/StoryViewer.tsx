@@ -15,7 +15,8 @@ export default function StoryViewer() {
   const { user } = useAuth();
   const { storyGroups, markViewed, deleteStory } = useStories();
 
-  const group = storyGroups.find((g) => g.user_id === userId);
+  const groupIndex = storyGroups.findIndex((g) => g.user_id === userId);
+  const group = groupIndex >= 0 ? storyGroups[groupIndex] : undefined;
   const stories = group?.stories || [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,6 +26,18 @@ export default function StoryViewer() {
 
   const story = stories[currentIndex] as Story | undefined;
   const isOwn = userId === user?.id;
+
+  const goToGroup = useCallback((idx: number) => {
+    const g = storyGroups[idx];
+    if (!g) {
+      navigate(-1);
+      return;
+    }
+    setCurrentIndex(0);
+    setProgress(0);
+    setLiked(false);
+    navigate(`/story?userId=${g.user_id}`, { replace: true });
+  }, [storyGroups, navigate]);
 
   // Mark viewed on each story change
   useEffect(() => {
