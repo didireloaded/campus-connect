@@ -53,12 +53,22 @@ export function useStories() {
 
       const grouped = new Map<string, StoryGroup>();
       for (const s of ((data as any[]) || [])) {
-        const viewed = (s.story_views || []).some((v: any) => v.viewer_id === profile.id);
-        const story: Story = { ...s, viewed, story_views: undefined };
+        // Defensive: skip malformed rows or stories that escape university scoping
+        if (!s || !s.user_id || !s.media_url) continue;
+        if (!s.university_id || s.university_id !== profile.university_id) continue;
+
+        const viewed = (s.story_views || []).some((v: any) => v?.viewer_id === profile.id);
+        const safeProfile = s.profile || {
+          id: s.user_id,
+          username: 'user',
+          full_name: '',
+          avatar_url: undefined,
+        };
+        const story: Story = { ...s, profile: safeProfile, viewed, story_views: undefined };
         if (!grouped.has(s.user_id)) {
           grouped.set(s.user_id, {
             user_id: s.user_id,
-            profile: s.profile,
+            profile: safeProfile,
             stories: [],
             hasUnviewed: false,
           });
