@@ -149,7 +149,7 @@ export function CreateStorySheet({ open, onOpenChange }: CreateStorySheetProps) 
             </div>
           </div>
 
-          <Button onClick={handleSubmit} disabled={loading || !file} className="w-full bg-primary text-primary-foreground">
+          <Button onClick={handleSubmit} disabled={loading || !file || !hasUniversity} className="w-full bg-primary text-primary-foreground">
             {loading ? <Loader2 className="animate-spin mr-2" size={16} /> : null}
             Post Story
           </Button>
